@@ -12,14 +12,8 @@ func pathHandler(w http.ResponseWriter, r *http.Request) {
   case "/":
     homeHandler(w, r)
   default: 
-    notFoundHandler(w, r)
+    http.Error(w, "Page not found", http.StatusNotFound)
   }
-}
-
-func notFoundHandler(w http.ResponseWriter, r *http.Request) {
-  w.WriteHeader(http.StatusNotFound)
-  w.Header().Set("Content-Type", "text/html; charset=utf-8")
-  fmt.Fprint(w, "<h1>Not found</h1><p>Sorry what you requested was not found</p>")
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
