@@ -2,46 +2,50 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"html/template"
+	"log"
+	"net/http"
+	"path/filepath"
 )
 
-func galleryHandler(w http.ResponseWriter, r *http.Request) {
+func executeTemplate(w http.ResponseWriter, tPath string, tData TemplateData) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	t, err := template.ParseFiles(tPath)
+	if err != nil {
+		log.Printf("error parsing template %v, %v\n", tPath, err)
+		http.Error(w, "error parsing template", http.StatusInternalServerError)
+		return
+	}
+	err = t.Execute(w, tData)
+	if err != nil {
+		log.Printf("error executing template %v, %v\n", tPath, err)
+		http.Error(w, "error executing template", http.StatusInternalServerError)
+	}
+}
+
+type TemplateData struct {
+	Id string
+}
+
+func galleryHandler(w http.ResponseWriter, r *http.Request) {
 	galleryId := chi.URLParam(r, "id")
-	fmt.Fprintf(w, "<h1>Gallery %s</h1>", galleryId)
+	executeTemplate(w, filepath.Join("templates", "gallery.gohtml"), TemplateData{
+		Id: galleryId,
+	})
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "<h1>Welcome to my awesome site</h1>")
+	executeTemplate(w, filepath.Join("templates", "home.gohtml"), TemplateData{})
 }
 
 func contactHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "<h1>Contact Page</h1><p>To contact, <a href=\"mailto:webdevwithgo@gmail.com\">email me</a></p>")
+	executeTemplate(w, filepath.Join("templates", "contact.gohtml"), TemplateData{})
 }
 
 func faqHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, `
-  <h1>Frequently Asked Questions</h1>
-
-  <div style="margin-bottom: 20px;">
-      <h2>1. Why did you develop this web app?</h2>
-      <p>We developed this web app to provide a convenient and efficient solution for managing an image gallery. Our aim is to make image galleries easier and more accessible for everyone.</p>
-  </div>
-
-  <div style="margin-bottom: 20px;">
-      <h2>2. Will it always be free?</h2>
-      <p>As of now, the basic features of this web app are free to use. However, we may introduce premium features in the future that could be available for a fee. We are committed to always offering a free version with essential functionalities.</p>
-  </div>
-
-  <div style="margin-bottom: 20px;">
-      <h2>3. Who do I contact for help?</h2>
-      <p>If you encounter any issues or have questions, you can reach out to our support team at <a href="mailto:webdevwithgo@gmail.com">webdevwithgo@gmail.com</a>. We're here to help!</p>
-  </div>`)
+	executeTemplate(w, filepath.Join("templates", "faq.gohtml"), TemplateData{})
 }
 
 func main() {
