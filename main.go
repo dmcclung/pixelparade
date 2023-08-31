@@ -2,50 +2,44 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"html/template"
-	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/dmcclung/pixelparade/views"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
-func executeTemplate(w http.ResponseWriter, tPath string, tData TemplateData) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	t, err := template.ParseFiles(tPath)
-	if err != nil {
-		log.Printf("error parsing template %v, %v\n", tPath, err)
-		http.Error(w, "error parsing template", http.StatusInternalServerError)
-		return
-	}
-	err = t.Execute(w, tData)
-	if err != nil {
-		log.Printf("error executing template %v, %v\n", tPath, err)
-		http.Error(w, "error executing template", http.StatusInternalServerError)
-	}
+type GalleryData struct {
+  Id string
 }
 
-type TemplateData struct {
-	Id string
+func executeTemplate(w http.ResponseWriter, tPath string, tData interface{}) {
+  t, err := views.Parse(tPath)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    return
+  }
+	t.Execute(w, tData)
 }
 
 func galleryHandler(w http.ResponseWriter, r *http.Request) {
 	galleryId := chi.URLParam(r, "id")
-	executeTemplate(w, filepath.Join("templates", "gallery.gohtml"), TemplateData{
-		Id: galleryId,
-	})
+  executeTemplate(w, filepath.Join("templates", "gallery.gohtml"), GalleryData{
+    Id: galleryId,
+  })
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	executeTemplate(w, filepath.Join("templates", "home.gohtml"), TemplateData{})
+  executeTemplate(w, filepath.Join("templates", "home.gohtml"), nil)
 }
 
 func contactHandler(w http.ResponseWriter, r *http.Request) {
-	executeTemplate(w, filepath.Join("templates", "contact.gohtml"), TemplateData{})
+  executeTemplate(w, filepath.Join("templates", "contact.gohtml"), nil)
 }
 
 func faqHandler(w http.ResponseWriter, r *http.Request) {
-	executeTemplate(w, filepath.Join("templates", "faq.gohtml"), TemplateData{})
+	executeTemplate(w, filepath.Join("templates", "faq.gohtml"), nil)
 }
 
 func main() {
