@@ -29,42 +29,33 @@ func main() {
     panic(err)
   }
 
-  r.Get("/", controllers.Static{
-    HtmlTmpl: tmplt,
-  }.Get)
+  r.Get("/", controllers.Static(tmplt))
 
   tmplt, err = views.Parse(filepath.Join("templates", "contact.gohtml"))
   if err != nil {
     panic(err)
   }
 
-  r.Get("/contact", controllers.Static{
-    HtmlTmpl: tmplt,
-  }.Get)
+  r.Get("/contact", controllers.Static(tmplt))
 
   tmplt, err = views.Parse(filepath.Join("templates", "faq.gohtml"))
   if err != nil {
     panic(err)
   }
 
-  r.Get("/faq", controllers.Static{
-    HtmlTmpl: tmplt,
-  }.Get)
+  r.Get("/faq", controllers.Static(tmplt))
 
   tmplt, err = views.Parse(filepath.Join("templates", "gallery.gohtml"))
   if err != nil {
     panic(err)
   }
 
-  galleryController := controllers.Gallery{
-    HtmlTmpl: tmplt,
-  }
-
-	r.Get("/gallery/{id}", galleryController.GetGalleryById)
+	r.Get("/gallery/{id}", controllers.GetGalleryById(tmplt))
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Page not found", http.StatusNotFound)
 	})
+
 	fmt.Println("Starting the server on :3000...")
 	http.ListenAndServe(":3000", r)
 }
