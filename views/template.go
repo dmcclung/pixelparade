@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+
+	"github.com/dmcclung/pixelparade/templates"
 )
 
 type Template struct {
@@ -17,8 +19,8 @@ func Must(t Template, err error) Template {
 	return t
 }
 
-func Parse(tPath string) (Template, error) {
-  t, err := template.ParseFiles(tPath)
+func Parse(tName string) (Template, error) {
+  t, err := template.ParseFS(templates.FS, tName)
   if err != nil {
 		return Template{}, fmt.Errorf("parsing template: %v", err)
 	}
