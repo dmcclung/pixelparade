@@ -19,8 +19,8 @@ func Must(t Template, err error) Template {
 	return t
 }
 
-func Parse(tName string) (Template, error) {
-  t, err := template.ParseFS(templates.FS, tName)
+func Parse(tName ...string) (Template, error) {
+  t, err := template.ParseFS(templates.FS, tName...)
   if err != nil {
 		return Template{}, fmt.Errorf("parsing template: %v", err)
 	}
@@ -37,5 +37,3 @@ func (t Template) Execute(w http.ResponseWriter, tData interface{}) (error) {
 	}
   return nil
 }
-
-
