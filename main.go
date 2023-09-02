@@ -23,6 +23,11 @@ func main() {
 	tmplt = views.Must(views.Parse("faq.gohtml", "tailwind.gohtml"))
 	r.Get("/faq", controllers.Faq(tmplt))
 
+	tmplt = views.Must(views.Parse("signup.gohtml", "tailwind.gohtml"))
+	r.Get("/signup", controllers.Static(tmplt))
+
+	// r.Post("/signup", controllers.UserSignup())
+
 	tmplt = views.Must(views.Parse("gallery.gohtml", "tailwind.gohtml"))
 	r.Get("/gallery/{id}", controllers.GetGalleryById(tmplt))
 
