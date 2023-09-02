@@ -14,16 +14,16 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	tmplt := views.Must(views.Parse("home.gohtml"))
+	tmplt := views.Must(views.Parse("home.gohtml", "tailwind.gohtml"))
 	r.Get("/", controllers.Static(tmplt))
 
-	tmplt = views.Must(views.Parse("contact.gohtml"))
+	tmplt = views.Must(views.Parse("contact.gohtml", "tailwind.gohtml"))
 	r.Get("/contact", controllers.Static(tmplt))
 
-	tmplt = views.Must(views.Parse("faq.gohtml"))
+	tmplt = views.Must(views.Parse("faq.gohtml", "tailwind.gohtml"))
 	r.Get("/faq", controllers.Faq(tmplt))
 
-	tmplt = views.Must(views.Parse("gallery.gohtml"))
+	tmplt = views.Must(views.Parse("gallery.gohtml", "tailwind.gohtml"))
 	r.Get("/gallery/{id}", controllers.GetGalleryById(tmplt))
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
