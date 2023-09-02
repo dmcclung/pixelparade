@@ -20,20 +20,20 @@ func Must(t Template, err error) Template {
 }
 
 func Parse(tName ...string) (Template, error) {
-  t, err := template.ParseFS(templates.FS, tName...)
-  if err != nil {
+	t, err := template.ParseFS(templates.FS, tName...)
+	if err != nil {
 		return Template{}, fmt.Errorf("parsing template: %v", err)
 	}
-  return Template{
-    htmlTmpl: t,
-  }, nil
+	return Template{
+		htmlTmpl: t,
+	}, nil
 }
 
-func (t Template) Execute(w http.ResponseWriter, tData interface{}) (error) {
+func (t Template) Execute(w http.ResponseWriter, tData interface{}) error {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	err := t.htmlTmpl.Execute(w, tData)
 	if err != nil {
-    return fmt.Errorf("executing template: %v", err)
+		return fmt.Errorf("executing template: %v", err)
 	}
-  return nil
+	return nil
 }
