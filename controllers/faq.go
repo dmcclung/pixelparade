@@ -3,11 +3,9 @@ package controllers
 import (
 	"html/template"
 	"net/http"
-
-	"github.com/dmcclung/pixelparade/views"
 )
 
-func Faq(tmplt views.Template) http.HandlerFunc {
+func Faq(tmplt Template) http.HandlerFunc {
 	faqItems := []struct {
 		Question string
 		Answer   template.HTML

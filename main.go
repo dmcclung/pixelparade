@@ -14,22 +14,32 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	tmplt := views.Must(views.Parse("home.gohtml", "tailwind.gohtml"))
-	r.Get("/", controllers.Static(tmplt))
+	r.Get("/", controllers.Static(
+		views.Must(views.Parse("home.gohtml", "tailwind.gohtml")),
+	))
 
-	tmplt = views.Must(views.Parse("contact.gohtml", "tailwind.gohtml"))
-	r.Get("/contact", controllers.Static(tmplt))
+	r.Get("/contact", controllers.Static(
+		views.Must(views.Parse("contact.gohtml", "tailwind.gohtml")),
+	))
 
-	tmplt = views.Must(views.Parse("faq.gohtml", "tailwind.gohtml"))
-	r.Get("/faq", controllers.Faq(tmplt))
+	r.Get("/faq", controllers.Faq(
+		views.Must(views.Parse("faq.gohtml", "tailwind.gohtml")),
+	))
 
-	tmplt = views.Must(views.Parse("signup.gohtml", "tailwind.gohtml"))
-	r.Get("/signup", controllers.Static(tmplt))
+	userController := controllers.User{
+		Templates: struct{New controllers.Template}{
+			New: views.Must(views.Parse("signup.gohtml", "tailwind.gohtml")),
+		},
+	}
+	r.Get("/signup", userController.Create)
+	r.Post("/signup", userController.New)
 
-	// r.Post("/signup", controllers.UserSignup())
-
-	tmplt = views.Must(views.Parse("gallery.gohtml", "tailwind.gohtml"))
-	r.Get("/gallery/{id}", controllers.GetGalleryById(tmplt))
+	galleryController := controllers.Gallery{
+		Templates: struct{Get controllers.Template}{
+			Get: views.Must(views.Parse("gallery.gohtml", "tailwind.gohtml")),
+		},
+	} 
+	r.Get("/gallery/{id}", galleryController.Get)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Page not found", http.StatusNotFound)
