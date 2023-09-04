@@ -5,12 +5,21 @@ import (
 	"net/http"
 
 	"github.com/dmcclung/pixelparade/controllers"
+	"github.com/dmcclung/pixelparade/db"
+	"github.com/dmcclung/pixelparade/models"
 	"github.com/dmcclung/pixelparade/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 func main() {
+	db, err := db.DefaultPostgresConfig.Open()
+	if err != nil {
+		panic(err)
+	}
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
@@ -26,10 +35,15 @@ func main() {
 		views.Must(views.Parse("faq.gohtml", "tailwind.gohtml")),
 	))
 
+	userService := models.UserService{
+		DB: db,
+	}
+
 	userController := controllers.User{
 		Templates: struct{New controllers.Template}{
 			New: views.Must(views.Parse("signup.gohtml", "tailwind.gohtml")),
 		},
+		UserService: userService,
 	}
 	r.Get("/signup", userController.Create)
 	r.Post("/signup", userController.New)
