@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/dmcclung/pixelparade/models"
@@ -24,6 +24,12 @@ func (u User) Create(w http.ResponseWriter, r *http.Request) {
 func (u User) New(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
-	fmt.Printf("User signup %v, %v\n", email, password)
+	user, err := u.UserService.Create(email, password)
+	// TODO: error handling could be better here
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	log.Printf("User signup %v, %v\n", user.Email, user.Password)
+	// TODO: How to redirect and save sesssion?
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
