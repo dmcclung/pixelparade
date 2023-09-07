@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/dmcclung/pixelparade/db"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -29,6 +30,18 @@ var	deleteUserSql = `DELETE FROM users
 
 var updateUserSql = `UPDATE users SET email = $1, password = $2 
 	WHERE email = $3`
+
+func (u UserService) Authenticate(email, password string) (*User, error) {
+	user, err := u.Get(email)
+	if err != nil {
+		return nil, fmt.Errorf("authenticate: %w", err)
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return nil, fmt.Errorf("authenticate: %w", err)
+	}
+	return user, nil
+}
 
 func (u UserService) Create(email, password string) (*User, error) {
 	h, err := db.HashPassword(password)

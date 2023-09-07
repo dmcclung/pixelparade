@@ -35,18 +35,30 @@ func main() {
 		views.Must(views.Parse("faq.gohtml", "tailwind.gohtml")),
 	))
 
+	r.Get("/me", func (w http.ResponseWriter, r *http.Request) {
+		email, err := r.Cookie("email")
+		if err != nil {
+			fmt.Fprint(w, "Could not read cookie")
+			return
+		}
+		fmt.Fprintf(w, "email cookie %v", email.Value)
+	})
+
 	userService := models.UserService{
 		DB: db,
 	}
 
 	userController := controllers.User{
-		Templates: struct{New controllers.Template}{
+		Templates: controllers.UserTemplates{
 			New: views.Must(views.Parse("signup.gohtml", "tailwind.gohtml")),
+			Signin: views.Must(views.Parse("signin.gohtml", "tailwind.gohtml")),
 		},
 		UserService: userService,
 	}
 	r.Get("/signup", userController.Create)
 	r.Post("/signup", userController.New)
+	r.Get("/signin", userController.Signin)
+	r.Post("/signin", userController.ProcessSignin)
 
 	galleryController := controllers.Gallery{
 		Templates: struct{Get controllers.Template}{
@@ -60,5 +72,8 @@ func main() {
 	})
 
 	fmt.Println("Starting the server on :3000...")
-	http.ListenAndServe(":3000", r)
+	err = http.ListenAndServe(":3000", r)
+	if err != nil {
+		panic(err)
+	}
 }
