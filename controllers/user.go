@@ -8,7 +8,7 @@ import (
 )
 
 type UserTemplates struct {
-	New Template
+	Signup Template
 	Signin Template
 }
 
@@ -17,21 +17,21 @@ type User struct {
 	UserService models.UserService
 }
 
-func (u User) Create(w http.ResponseWriter, r *http.Request) {
-	err := u.Templates.New.Execute(w, nil)
+func (u User) GetSignup(w http.ResponseWriter, r *http.Request) {
+	err := u.Templates.Signup.Execute(w, r, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-func (u User) Signin(w http.ResponseWriter, r *http.Request) {
-	err := u.Templates.Signin.Execute(w, nil)
+func (u User) GetSignin(w http.ResponseWriter, r *http.Request) {
+	err := u.Templates.Signin.Execute(w, r, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-func (u User) ProcessSignin(w http.ResponseWriter, r *http.Request) {
+func (u User) PostSignin(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 	log.Printf("email %v password %v", email, password)
@@ -45,12 +45,13 @@ func (u User) ProcessSignin(w http.ResponseWriter, r *http.Request) {
 		Name:  "email",
 		Value: user.Email,
 		Path:  "/",
+		HttpOnly: true,
 	}
 	http.SetCookie(w, &cookie)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (u User) New(w http.ResponseWriter, r *http.Request) {
+func (u User) PostSignup(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 	user, err := u.UserService.Create(email, password)

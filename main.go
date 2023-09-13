@@ -10,6 +10,7 @@ import (
 	"github.com/dmcclung/pixelparade/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/gorilla/csrf"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -41,6 +42,7 @@ func main() {
 			fmt.Fprint(w, "Could not read cookie")
 			return
 		}
+		fmt.Fprintf(w, "Headers: %+v\n", r.Header)
 		fmt.Fprintf(w, "email cookie %v", email.Value)
 	})
 
@@ -50,15 +52,15 @@ func main() {
 
 	userController := controllers.User{
 		Templates: controllers.UserTemplates{
-			New: views.Must(views.Parse("signup.gohtml", "tailwind.gohtml")),
+			Signup: views.Must(views.Parse("signup.gohtml", "tailwind.gohtml")),
 			Signin: views.Must(views.Parse("signin.gohtml", "tailwind.gohtml")),
 		},
 		UserService: userService,
 	}
-	r.Get("/signup", userController.Create)
-	r.Post("/signup", userController.New)
-	r.Get("/signin", userController.Signin)
-	r.Post("/signin", userController.ProcessSignin)
+	r.Get("/signup", userController.GetSignup)
+	r.Post("/signup", userController.PostSignup)
+	r.Get("/signin", userController.GetSignin)
+	r.Post("/signin", userController.PostSignin)
 
 	galleryController := controllers.Gallery{
 		Templates: struct{Get controllers.Template}{
@@ -71,8 +73,15 @@ func main() {
 		http.Error(w, "Page not found", http.StatusNotFound)
 	})
 
+	csrfKey := "gFvi45R4fy5xNBlnEeZtQbfAVCYEIAUX"
+	csrfMw := csrf.Protect(
+		[]byte(csrfKey),
+		// TODO: Fix this before deploying
+		csrf.Secure(false),
+	)
+
 	fmt.Println("Starting the server on :3000...")
-	err = http.ListenAndServe(":3000", r)
+	err = http.ListenAndServe(":3000", csrfMw(r))
 	if err != nil {
 		panic(err)
 	}

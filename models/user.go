@@ -25,7 +25,7 @@ var createUserSql = `INSERT INTO users (email, password)
 var getUserSql = `SELECT id, email, password FROM users 
 	WHERE email = $1`
 
-var	deleteUserSql = `DELETE FROM users 
+var deleteUserSql = `DELETE FROM users 
 	WHERE email = $1`
 
 var updateUserSql = `UPDATE users SET email = $1, password = $2 

@@ -33,7 +33,7 @@ func Faq(tmplt Template) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := tmplt.Execute(w, faqItems)
+		err := tmplt.Execute(w, r, faqItems)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
