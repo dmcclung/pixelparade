@@ -36,17 +36,11 @@ func main() {
 		views.Must(views.Parse("faq.gohtml", "tailwind.gohtml")),
 	))
 
-	r.Get("/me", func (w http.ResponseWriter, r *http.Request) {
-		email, err := r.Cookie("email")
-		if err != nil {
-			fmt.Fprint(w, "Could not read cookie")
-			return
-		}
-		fmt.Fprintf(w, "Headers: %+v\n", r.Header)
-		fmt.Fprintf(w, "email cookie %v", email.Value)
-	})
-
 	userService := models.UserService{
+		DB: db,
+	}
+
+	sessionService := models.SessionService{
 		DB: db,
 	}
 
@@ -55,12 +49,15 @@ func main() {
 			Signup: views.Must(views.Parse("signup.gohtml", "tailwind.gohtml")),
 			Signin: views.Must(views.Parse("signin.gohtml", "tailwind.gohtml")),
 		},
-		UserService: userService,
+		UserService: &userService,
+		SessionService: &sessionService,
 	}
 	r.Get("/signup", userController.GetSignup)
 	r.Post("/signup", userController.PostSignup)
 	r.Get("/signin", userController.GetSignin)
 	r.Post("/signin", userController.PostSignin)
+
+	r.Get("/me", userController.CurrentUser)
 
 	galleryController := controllers.Gallery{
 		Templates: struct{Get controllers.Template}{

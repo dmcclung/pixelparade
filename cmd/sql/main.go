@@ -20,16 +20,19 @@ func main() {
 		panic(err)
 	}
 
-	sqlFile := "models/sql/user.sql"
-	content, err := os.ReadFile(sqlFile)
-	if err != nil {
-		panic(err)
-	}
+	sqlFiles := []string{"models/sql/user.sql", "models/sql/session.sql"}
 
-	sql := string(content)
-	_, err = db.Exec(sql)
-	if err != nil {
-		panic(err)
+	for _, sqlFile := range sqlFiles {
+		content, err := os.ReadFile(sqlFile)
+		if err != nil {
+			panic(err)
+		}
+
+		sql := string(content)
+		_, err = db.Exec(sql)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	fmt.Println("Done!")
