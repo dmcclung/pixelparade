@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/dmcclung/pixelparade/controllers"
-	"github.com/dmcclung/pixelparade/db"
 	"github.com/dmcclung/pixelparade/models"
 	"github.com/dmcclung/pixelparade/views"
 	"github.com/go-chi/chi/v5"
@@ -16,7 +15,13 @@ import (
 )
 
 func main() {
-	db, err := db.DefaultPostgresConfig.Open()
+	db, err := models.DefaultPostgresConfig.Open()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	err = models.Migrate(db)
 	if err != nil {
 		panic(err)
 	}
@@ -56,7 +61,7 @@ func main() {
 	r.Post("/signup", userController.PostSignup)
 	r.Get("/signin", userController.GetSignin)
 	r.Post("/signin", userController.PostSignin)
-
+	r.Post("/signout", userController.GetSignout)
 	r.Get("/me", userController.CurrentUser)
 
 	galleryController := controllers.Gallery{
@@ -77,8 +82,12 @@ func main() {
 		csrf.Secure(false),
 	)
 
+	umw := controllers.UserMiddleware{
+		SessionService: &sessionService,
+	}
+
 	fmt.Println("Starting the server on :3000...")
-	err = http.ListenAndServe(":3000", csrfMw(r))
+	err = http.ListenAndServe(":3000", csrfMw(umw.SetUser(r)))
 	if err != nil {
 		panic(err)
 	}

@@ -20,7 +20,7 @@ func HashPassword(password string) (string, error) {
 }
 
 func main() {
-	password := "mysecretpassword"
+	password := "admin"
 	hashedPassword, err := HashPassword(password)
 	if err != nil {
 		log.Fatalf("Error hashing password: %v", err)

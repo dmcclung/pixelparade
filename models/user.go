@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/dmcclung/pixelparade/db"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -44,7 +43,7 @@ func (u UserService) Authenticate(email, password string) (*User, error) {
 }
 
 func (u UserService) Create(email, password string) (*User, error) {
-	h, err := db.HashPassword(password)
+	h, err := HashPassword(password)
 	if err != nil {
 		return nil, fmt.Errorf("hashing password for create: %w", err)
 	}
@@ -96,7 +95,7 @@ func (u UserService) Delete(email string) error {
 }
 
 func (u UserService) Update(currentEmail, email, password string) error {
-	h, err := db.HashPassword(password)
+	h, err := HashPassword(password)
 	if err != nil {
 		return fmt.Errorf("hashing password for update: %w", err)
 	}

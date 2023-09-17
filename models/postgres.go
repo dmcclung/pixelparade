@@ -1,9 +1,12 @@
-package db
+package models
 
 import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	"github.com/dmcclung/pixelparade/migrations"
+	"github.com/pressly/goose/v3"
 )
 
 type PostgresConfig struct {
@@ -41,3 +44,15 @@ func (pg PostgresConfig) Open() (*sql.DB, error) {
 	return db, nil
 }
 
+func Migrate(db *sql.DB) error {
+	err := goose.SetDialect("postgres")
+	if err != nil {
+		return fmt.Errorf("migrate: %w", err)
+	}
+	goose.SetBaseFS(migrations.FS)
+	err = goose.Up(db, ".")
+	if err != nil {
+		return fmt.Errorf("migrate: %w", err)
+	}
+	return nil
+}

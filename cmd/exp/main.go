@@ -1,30 +1,29 @@
 package main
 
 import (
-	"html/template"
-	"os"
+	stdctx "context"
+	"fmt"
+
+	"github.com/dmcclung/pixelparade/models"
+	"github.com/dmcclung/pixelparade/context"
 )
 
-type User struct {
-	Name   string
-	Age    int
-	Script template.HTML
-}
+type ctxKey string
+
+const (
+	someKey ctxKey = "someKey"
+)
+
 
 func main() {
-	t, err := template.ParseFiles("hello.gohtml")
-	if err != nil {
-		panic(err)
+	ctx := stdctx.Background()
+
+	user := models.User{
+		Email: "admin@pixelparade",
 	}
 
-	user := User{
-		Name:   "Dylan",
-		Age:    100,
-		Script: "<p>my html script</p>",
-	}
+	ctx = context.WithUser(ctx, &user)
 
-	err = t.Execute(os.Stdout, user)
-	if err != nil {
-		panic(err)
-	}
+	val := context.User(ctx)
+	fmt.Printf("User email is %v\n", val.Email)
 }
