@@ -26,8 +26,29 @@ func main() {
 		panic(err)
 	}
 
+	userService := models.UserService{
+		DB: db,
+	}
+
+	sessionService := models.SessionService{
+		DB: db,
+	}
+
+	csrfKey := "gFvi45R4fy5xNBlnEeZtQbfAVCYEIAUX"
+	csrfMw := csrf.Protect(
+		[]byte(csrfKey),
+		// TODO: Fix this before deploying
+		csrf.Secure(false),
+	)
+
+	umw := controllers.UserMiddleware{
+		SessionService: &sessionService,
+	}
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(csrfMw)
+	r.Use(umw.SetUser)
 
 	r.Get("/", controllers.Static(
 		views.Must(views.Parse("home.gohtml", "tailwind.gohtml")),
@@ -40,14 +61,6 @@ func main() {
 	r.Get("/faq", controllers.Faq(
 		views.Must(views.Parse("faq.gohtml", "tailwind.gohtml")),
 	))
-
-	userService := models.UserService{
-		DB: db,
-	}
-
-	sessionService := models.SessionService{
-		DB: db,
-	}
 
 	userController := controllers.User{
 		Templates: controllers.UserTemplates{
@@ -62,8 +75,12 @@ func main() {
 	r.Get("/signin", userController.GetSignin)
 	r.Post("/signin", userController.PostSignin)
 	r.Post("/signout", userController.GetSignout)
-	r.Get("/me", userController.CurrentUser)
 
+	r.Route("/users/me", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Get("/", userController.CurrentUser)
+	})
+	
 	galleryController := controllers.Gallery{
 		Templates: struct{Get controllers.Template}{
 			Get: views.Must(views.Parse("gallery.gohtml", "tailwind.gohtml")),
@@ -75,19 +92,8 @@ func main() {
 		http.Error(w, "Page not found", http.StatusNotFound)
 	})
 
-	csrfKey := "gFvi45R4fy5xNBlnEeZtQbfAVCYEIAUX"
-	csrfMw := csrf.Protect(
-		[]byte(csrfKey),
-		// TODO: Fix this before deploying
-		csrf.Secure(false),
-	)
-
-	umw := controllers.UserMiddleware{
-		SessionService: &sessionService,
-	}
-
 	fmt.Println("Starting the server on :3000...")
-	err = http.ListenAndServe(":3000", csrfMw(umw.SetUser(r)))
+	err = http.ListenAndServe(":3000", r)
 	if err != nil {
 		panic(err)
 	}

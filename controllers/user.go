@@ -36,11 +36,6 @@ func (u User) GetSignin(w http.ResponseWriter, r *http.Request) {
 
 func (u User) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
-	if user == nil {
-		http.Redirect(w, r, "/signin", http.StatusSeeOther)
-		return
-	}
-
 	fmt.Fprintf(w, "Current user: %s\n", user.Email)
 }
 
@@ -115,6 +110,17 @@ func (u User) PostSignup(w http.ResponseWriter, r *http.Request) {
 
 type UserMiddleware struct {
 	SessionService *models.SessionService
+}
+
+func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := context.User(r.Context())
+		if user == nil {
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
