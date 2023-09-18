@@ -12,6 +12,7 @@ import (
 type UserTemplates struct {
 	Signup Template
 	Signin Template
+	Me Template
 }
 
 type User struct {
@@ -36,7 +37,13 @@ func (u User) GetSignin(w http.ResponseWriter, r *http.Request) {
 
 func (u User) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
-	fmt.Fprintf(w, "Current user: %s\n", user.Email)
+	log.Printf("Current user: %s\n", user.Email)
+	err := u.Templates.Me.Execute(w, r, user.Email)
+	if err != nil {
+		log.Printf("error rendering me: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (u User) PostSignin(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +72,7 @@ func (u User) PostSignin(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (u User) GetSignout(w http.ResponseWriter, r *http.Request) {
+func (u User) PostSignout(w http.ResponseWriter, r *http.Request) {
 	token, err := readCookie(r, CookieSession)
 	if err != nil {
 		log.Printf("signout: %v\n", err)

@@ -15,6 +15,11 @@ type Template struct {
 	htmlTmpl *template.Template
 }
 
+type HeaderData struct {
+	Tab string
+	Header string
+}
+
 func Must(t Template, err error) Template {
 	if err != nil {
 		panic(err)
@@ -28,6 +33,12 @@ func Parse(name ...string) (Template, error) {
 		template.FuncMap{
 			"csrfField": func() (template.HTML, error) {
 				return "", fmt.Errorf("csrfField not implemented")
+			},
+			"header": func(tab, header string) HeaderData {
+				return HeaderData{
+					Tab: tab,
+					Header: header,
+				}
 			},
 		},
 	)

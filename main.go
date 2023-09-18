@@ -66,6 +66,7 @@ func main() {
 		Templates: controllers.UserTemplates{
 			Signup: views.Must(views.Parse("signup.gohtml", "tailwind.gohtml")),
 			Signin: views.Must(views.Parse("signin.gohtml", "tailwind.gohtml")),
+			Me: views.Must(views.Parse("me.gohtml", "tailwind.gohtml")),
 		},
 		UserService: &userService,
 		SessionService: &sessionService,
@@ -74,7 +75,7 @@ func main() {
 	r.Post("/signup", userController.PostSignup)
 	r.Get("/signin", userController.GetSignin)
 	r.Post("/signin", userController.PostSignin)
-	r.Post("/signout", userController.GetSignout)
+	r.Post("/signout", userController.PostSignout)
 
 	r.Route("/users/me", func(r chi.Router) {
 		r.Use(umw.RequireUser)
