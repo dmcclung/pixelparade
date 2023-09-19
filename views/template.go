@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/dmcclung/pixelparade/context"
+	"github.com/dmcclung/pixelparade/models"
 	"github.com/dmcclung/pixelparade/templates"
 	"github.com/gorilla/csrf"
 )
@@ -18,6 +20,7 @@ type Template struct {
 type HeaderData struct {
 	Tab string
 	Header string
+	User *models.User
 }
 
 func Must(t Template, err error) Template {
@@ -34,11 +37,11 @@ func Parse(name ...string) (Template, error) {
 			"csrfField": func() (template.HTML, error) {
 				return "", fmt.Errorf("csrfField not implemented")
 			},
-			"header": func(tab, header string) HeaderData {
-				return HeaderData{
-					Tab: tab,
-					Header: header,
-				}
+			"header": func(tab, header string) (*HeaderData, error) {
+				return nil, fmt.Errorf("header not implemented")
+			},
+			"currentUser": func() (*models.User, error) {
+				return nil, fmt.Errorf("currentUser not implemented")
 			},
 		},
 	)
@@ -61,6 +64,15 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 		template.FuncMap{
 			"csrfField": func() template.HTML {
 				return csrf.TemplateField(r)
+			},
+			"header": func(tab, header string) *HeaderData {
+				return &HeaderData{
+					Tab: tab,
+					Header: header,
+				}
+			},
+			"currentUser": func() *models.User {
+				return context.User(r.Context())
 			},
 		},
 	)

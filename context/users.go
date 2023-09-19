@@ -6,7 +6,6 @@ import (
 	"github.com/dmcclung/pixelparade/models"
 )
 
-
 type ctxKey string
 
 const (
