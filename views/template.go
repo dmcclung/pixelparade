@@ -18,9 +18,9 @@ type Template struct {
 }
 
 type HeaderData struct {
-	Tab string
+	Tab    string
 	Header string
-	User *models.User
+	User   *models.User
 }
 
 func Must(t Template, err error) Template {
@@ -67,7 +67,7 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 			},
 			"header": func(tab, header string) *HeaderData {
 				return &HeaderData{
-					Tab: tab,
+					Tab:    tab,
 					Header: header,
 				}
 			},

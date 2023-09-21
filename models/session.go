@@ -22,7 +22,7 @@ type Session struct {
 }
 
 type SessionService struct {
-	DB *sql.DB
+	DB            *sql.DB
 	BytesPerToken int
 }
 
@@ -55,9 +55,9 @@ func (ss *SessionService) Create(userID string) (*Session, error) {
 	}
 
 	return &Session{
-		ID: id,
-		UserID: userID,
-		Token: token,
+		ID:        id,
+		UserID:    userID,
+		Token:     token,
 		TokenHash: tokenHash,
 	}, nil
 }
@@ -74,7 +74,7 @@ func (ss *SessionService) Delete(token string) error {
 }
 
 func (ss *SessionService) User(token string) (*User, error) {
-	tokenHash := ss.hash(token)	
+	tokenHash := ss.hash(token)
 	log.Printf("user token hash %v", tokenHash)
 	user := User{}
 	err := ss.DB.QueryRow(getUserByToken, tokenHash).Scan(&user.ID, &user.Email, &user.Password)

@@ -9,8 +9,8 @@ import (
 )
 
 type User struct {
-	ID string
-	Email string
+	ID       string
+	Email    string
 	Password string
 }
 
@@ -54,10 +54,10 @@ func (u UserService) Create(email, password string) (*User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("creating user: %w", err)
 	}
-	
+
 	return &User{
-		ID: id,
-		Email: email,
+		ID:       id,
+		Email:    email,
 		Password: h,
 	}, nil
 }
@@ -113,9 +113,6 @@ func (u UserService) Update(currentEmail, email, password string) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("no user found with email: %s", currentEmail)
 	}
-	
+
 	return nil
 }
-
-
-

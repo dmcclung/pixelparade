@@ -66,9 +66,9 @@ func main() {
 		Templates: controllers.UserTemplates{
 			Signup: views.Must(views.Parse("signup.gohtml", "tailwind.gohtml")),
 			Signin: views.Must(views.Parse("signin.gohtml", "tailwind.gohtml")),
-			Me: views.Must(views.Parse("me.gohtml", "tailwind.gohtml")),
+			Me:     views.Must(views.Parse("me.gohtml", "tailwind.gohtml")),
 		},
-		UserService: &userService,
+		UserService:    &userService,
 		SessionService: &sessionService,
 	}
 	r.Get("/signup", userController.GetSignup)
@@ -81,12 +81,12 @@ func main() {
 		r.Use(umw.RequireUser)
 		r.Get("/", userController.CurrentUser)
 	})
-	
+
 	galleryController := controllers.Gallery{
-		Templates: struct{Get controllers.Template}{
+		Templates: struct{ Get controllers.Template }{
 			Get: views.Must(views.Parse("gallery.gohtml", "tailwind.gohtml")),
 		},
-	} 
+	}
 	r.Get("/gallery/{id}", galleryController.Get)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {

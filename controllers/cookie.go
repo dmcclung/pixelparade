@@ -37,6 +37,3 @@ func readCookie(r *http.Request, name string) (string, error) {
 	}
 	return c.Value, nil
 }
-
-
-

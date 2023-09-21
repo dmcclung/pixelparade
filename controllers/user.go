@@ -12,7 +12,7 @@ import (
 type UserTemplates struct {
 	Signup Template
 	Signin Template
-	Me Template
+	Me     Template
 }
 
 type User struct {
@@ -49,9 +49,9 @@ func (u User) CurrentUser(w http.ResponseWriter, r *http.Request) {
 func (u User) PostSignin(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
-	
+
 	log.Printf("email %v password %v", email, password)
-	
+
 	user, err := u.UserService.Authenticate(email, password)
 	if err != nil {
 		log.Printf("error authenticating %v", err)

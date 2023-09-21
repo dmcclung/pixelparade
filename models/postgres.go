@@ -10,25 +10,25 @@ import (
 )
 
 type PostgresConfig struct {
-	host string
-	port string
-	user string
+	host     string
+	port     string
+	user     string
 	password string
-	dbname string
-	sslmode string
+	dbname   string
+	sslmode  string
 }
 
 var DefaultPostgresConfig = PostgresConfig{
-	host: "localhost",
-	port: "5432",
-	user: "admin",
+	host:     "localhost",
+	port:     "5432",
+	user:     "admin",
 	password: "admin",
-	dbname: "pixelparade",
-	sslmode: "disable",
+	dbname:   "pixelparade",
+	sslmode:  "disable",
 }
 
 func (pg PostgresConfig) Open() (*sql.DB, error) {
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", 
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		pg.host, pg.port, pg.user, pg.password, pg.dbname, pg.sslmode)
 	db, err := sql.Open("pgx", connStr)
 	if err != nil {
