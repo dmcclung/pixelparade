@@ -12,11 +12,11 @@ func main() {
 	html := `<h1>Hello there buddy!</h1><p>This is the email</p><p>Hope you enjoy it</p>`
 
 	email := models.Email{
-		To: to,
-		From: from,
-		Subject: subject,
+		To:        to,
+		From:      from,
+		Subject:   subject,
 		Plaintext: plaintext,
-		HTML: html,
+		HTML:      html,
 	}
 
 	emailService, err := models.GetEmailService()

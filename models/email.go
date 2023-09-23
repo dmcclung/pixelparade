@@ -21,11 +21,11 @@ type SMTPConfig struct {
 }
 
 type Email struct {
-	To string
-	From string
-	Subject string
+	To        string
+	From      string
+	Subject   string
 	Plaintext string
-	HTML string
+	HTML      string
 }
 
 func GetEmailConfig() (*SMTPConfig, error) {
@@ -55,7 +55,8 @@ func GetEmailConfig() (*SMTPConfig, error) {
 }
 
 type EmailService struct {
-	dialer *mail.Dialer
+	dialer        *mail.Dialer
+	DefaultSender string
 }
 
 func GetEmailService() (*EmailService, error) {
@@ -74,10 +75,28 @@ func GetEmailService() (*EmailService, error) {
 func (es *EmailService) SendEmail(email Email) error {
 	m := mail.NewMessage()
 	m.SetHeader("To", email.To)
-	m.SetHeader("From", email.From)
+
+	var from string
+	switch {
+	case email.From != "":
+		from = email.From
+	case es.DefaultSender != "":
+		from = es.DefaultSender
+	default:
+		from = DefaultSender
+	}
+	m.SetHeader("From", from)
+
 	m.SetHeader("Subject", email.Subject)
-	m.SetBody("text/plain", email.Plaintext)
-	m.AddAlternative("text/html", email.HTML)
+	switch {
+	case email.HTML != "" && email.Plaintext != "":
+		m.SetBody("text/html", email.HTML)
+		m.AddAlternative("text/plain", email.Plaintext)
+	case email.HTML == "" && email.Plaintext != "":
+		m.SetBody("text/plain", email.Plaintext)
+	case email.HTML != "" && email.Plaintext == "":
+		m.SetBody("text/html", email.HTML)
+	}
 
 	err := es.dialer.DialAndSend(m)
 	return err
