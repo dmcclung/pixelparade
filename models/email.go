@@ -83,10 +83,10 @@ func GetEmailService() (*EmailService, error) {
 
 func (es *EmailService) SendResetEmail(to, resetLink string) error {
 	email := Email{
-		To: to,
-		Subject: "Password Reset",
+		To:        to,
+		Subject:   "Password Reset",
 		Plaintext: fmt.Sprintf("To reset your password visit this link %v", resetLink),
-		HTML: fmt.Sprintf("<p>To reset your password visit this <a href=\"%v\">link</a></p>", resetLink), 
+		HTML:      fmt.Sprintf("<p>To reset your password visit this <a href=\"%v\">link</a></p>", resetLink),
 	}
 
 	err := es.SendEmail(email)
