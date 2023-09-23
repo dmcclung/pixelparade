@@ -28,4 +28,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	err = emailService.SendResetEmail("test@pixelparade", "https://google.com")
+	if err != nil {
+		panic(err)
+	}
 }

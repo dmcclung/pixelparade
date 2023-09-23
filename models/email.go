@@ -34,22 +34,31 @@ func GetEmailConfig() (*SMTPConfig, error) {
 		return nil, fmt.Errorf("loading env: %w", err)
 	}
 
-	envVars := []string{"EMAIL_HOST", "EMAIL_PORT", "EMAIL_USER", "EMAIL_PASS"}
-	args := []string{}
-	for _, envVar := range envVars {
-		val, exists := os.LookupEnv(envVar)
-		if !exists {
-			return nil, fmt.Errorf("%v not found", envVar)
-		}
-		args = append(args, val)
+	host, exists := os.LookupEnv("EMAIL_HOST")
+	if !exists {
+		return nil, fmt.Errorf("EMAIL_HOST environment var not found")
 	}
 
-	p, err := strconv.Atoi(args[1])
+	portStr, exists := os.LookupEnv("EMAIL_PORT")
+	if !exists {
+		return nil, fmt.Errorf("EMAIL_PORT environment var not found")
+	}
+	port, err := strconv.Atoi(portStr)
 	if err != nil {
 		return nil, fmt.Errorf("converting port: %w", err)
 	}
 
-	config := SMTPConfig{args[0], p, args[2], args[3]}
+	user, exists := os.LookupEnv("EMAIL_USER")
+	if !exists {
+		return nil, fmt.Errorf("EMAIL_USER environment var not found")
+	}
+
+	pass, exists := os.LookupEnv("EMAIL_PASS")
+	if !exists {
+		return nil, fmt.Errorf("EMAIL_PASS environment var not found")
+	}
+
+	config := SMTPConfig{host, port, user, pass}
 
 	return &config, nil
 }
@@ -70,6 +79,21 @@ func GetEmailService() (*EmailService, error) {
 	return &EmailService{
 		dialer: dialer,
 	}, nil
+}
+
+func (es *EmailService) SendResetEmail(to, resetLink string) error {
+	email := Email{
+		To: to,
+		Subject: "Password Reset",
+		Plaintext: fmt.Sprintf("To reset your password visit this link %v", resetLink),
+		HTML: fmt.Sprintf("<p>To reset your password visit this <a href=\"%v\">link</a></p>", resetLink), 
+	}
+
+	err := es.SendEmail(email)
+	if err != nil {
+		return fmt.Errorf("reset email: %w", err)
+	}
+	return nil
 }
 
 func (es *EmailService) SendEmail(email Email) error {
