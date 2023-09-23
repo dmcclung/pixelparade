@@ -20,6 +20,14 @@ type SMTPConfig struct {
 	Pass string
 }
 
+type Email struct {
+	To string
+	From string
+	Subject string
+	Plaintext string
+	HTML string
+}
+
 func GetEmailConfig() (*SMTPConfig, error) {
 	err := godotenv.Load()
 	if err != nil {
@@ -63,7 +71,14 @@ func GetEmailService() (*EmailService, error) {
 	}, nil
 }
 
-func (es *EmailService) SendEmail(m *mail.Message) error {
+func (es *EmailService) SendEmail(email Email) error {
+	m := mail.NewMessage()
+	m.SetHeader("To", email.To)
+	m.SetHeader("From", email.From)
+	m.SetHeader("Subject", email.Subject)
+	m.SetBody("text/plain", email.Plaintext)
+	m.AddAlternative("text/html", email.HTML)
+
 	err := es.dialer.DialAndSend(m)
 	return err
 }
