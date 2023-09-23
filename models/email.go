@@ -41,12 +41,7 @@ func GetEmailConfig() (*SMTPConfig, error) {
 		return nil, fmt.Errorf("converting port: %w", err)
 	}
 
-	config := SMTPConfig{
-		Host: args[0],
-		Port: p,
-		User: args[2],
-		Pass: args[3],
-	}
+	config := SMTPConfig{args[0], p, args[2], args[3]}
 
 	return &config, nil
 }
