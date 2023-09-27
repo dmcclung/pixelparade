@@ -28,39 +28,42 @@ type Email struct {
 	HTML      string
 }
 
-func GetEmailConfig() (*SMTPConfig, error) {
+func GetEmailConfig() (SMTPConfig, error) {
+	var config SMTPConfig
 	err := godotenv.Load()
 	if err != nil {
-		return nil, fmt.Errorf("loading env: %w", err)
+		return config, fmt.Errorf("loading env: %w", err)
 	}
 
 	host, exists := os.LookupEnv("EMAIL_HOST")
 	if !exists {
-		return nil, fmt.Errorf("EMAIL_HOST environment var not found")
+		return config, fmt.Errorf("EMAIL_HOST environment var not found")
 	}
+	config.Host = host
 
 	portStr, exists := os.LookupEnv("EMAIL_PORT")
 	if !exists {
-		return nil, fmt.Errorf("EMAIL_PORT environment var not found")
+		return config, fmt.Errorf("EMAIL_PORT environment var not found")
 	}
 	port, err := strconv.Atoi(portStr)
 	if err != nil {
-		return nil, fmt.Errorf("converting port: %w", err)
+		return config, fmt.Errorf("converting port: %w", err)
 	}
+	config.Port = port
 
 	user, exists := os.LookupEnv("EMAIL_USER")
 	if !exists {
-		return nil, fmt.Errorf("EMAIL_USER environment var not found")
+		return config, fmt.Errorf("EMAIL_USER environment var not found")
 	}
+	config.User = user
 
 	pass, exists := os.LookupEnv("EMAIL_PASS")
 	if !exists {
-		return nil, fmt.Errorf("EMAIL_PASS environment var not found")
+		return config, fmt.Errorf("EMAIL_PASS environment var not found")
 	}
+	config.Pass = pass
 
-	config := SMTPConfig{host, port, user, pass}
-
-	return &config, nil
+	return config, nil
 }
 
 type EmailService struct {
@@ -68,12 +71,7 @@ type EmailService struct {
 	DefaultSender string
 }
 
-func GetEmailService() (*EmailService, error) {
-	config, err := GetEmailConfig()
-	if err != nil {
-		return nil, fmt.Errorf("email config: %w", err)
-	}
-
+func GetEmailService(config SMTPConfig) (*EmailService, error) {
 	dialer := mail.NewDialer(config.Host, config.Port, config.User, config.Pass)
 
 	return &EmailService{

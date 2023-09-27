@@ -27,7 +27,7 @@ var DefaultPostgresConfig = PostgresConfig{
 	sslmode:  "disable",
 }
 
-func (pg PostgresConfig) Open() (*sql.DB, error) {
+func Open(pg PostgresConfig) (*sql.DB, error) {
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		pg.host, pg.port, pg.user, pg.password, pg.dbname, pg.sslmode)
 	db, err := sql.Open("pgx", connStr)

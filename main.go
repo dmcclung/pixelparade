@@ -14,8 +14,41 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
+type config struct {
+	PSQL models.PostgresConfig
+	SMTP models.SMTPConfig
+	CSRF struct {
+		Key string
+		Secure bool
+	}
+	Server struct {
+		Address string
+	}
+}
+
+func loadEnvConfig() (config, error) {
+	var cfg config
+	cfg.PSQL = models.DefaultPostgresConfig
+	smtpConfig, err := models.GetEmailConfig()
+	if err != nil {
+		return cfg, err
+	}
+	cfg.SMTP = smtpConfig
+	cfg.CSRF.Key = "gFvi45R4fy5xNBlnEeZtQbfAVCYEIAUX"
+	cfg.CSRF.Secure = false
+
+	cfg.Server.Address = ":3000"
+
+	return cfg, nil
+}
+
 func main() {
-	db, err := models.DefaultPostgresConfig.Open()
+	config, err := loadEnvConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	db, err := models.Open(config.PSQL)
 	if err != nil {
 		panic(err)
 	}
@@ -34,11 +67,19 @@ func main() {
 		DB: db,
 	}
 
-	csrfKey := "gFvi45R4fy5xNBlnEeZtQbfAVCYEIAUX"
+	emailService, err := models.GetEmailService(config.SMTP)
+	if err != nil {
+		panic(err)
+	}
+
+	passwordResetService := models.PasswordResetService{
+		DB: db,
+	}
+
 	csrfMw := csrf.Protect(
-		[]byte(csrfKey),
+		[]byte(config.CSRF.Key),
 		// TODO: Fix this before deploying
-		csrf.Secure(false),
+		csrf.Secure(config.CSRF.Secure),
 	)
 
 	umw := controllers.UserMiddleware{
@@ -72,6 +113,8 @@ func main() {
 		},
 		UserService:    &userService,
 		SessionService: &sessionService,
+		PasswordResetService: &passwordResetService,
+		EmailService: emailService,
 	}
 	r.Get("/signup", userController.GetSignup)
 	r.Post("/signup", userController.PostSignup)
@@ -99,7 +142,7 @@ func main() {
 	})
 
 	fmt.Println("Starting the server on :3000...")
-	err = http.ListenAndServe(":3000", r)
+	err = http.ListenAndServe(config.Server.Address, r)
 	if err != nil {
 		panic(err)
 	}

@@ -19,7 +19,12 @@ func main() {
 		HTML:      html,
 	}
 
-	emailService, err := models.GetEmailService()
+	config, err := models.GetEmailConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	emailService, err := models.GetEmailService(config)
 	if err != nil {
 		panic(err)
 	}
