@@ -4,21 +4,26 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/dmcclung/pixelparade/context"
 	"github.com/dmcclung/pixelparade/models"
 )
 
 type UserTemplates struct {
-	Signup Template
-	Signin Template
-	Me     Template
+	Signup         Template
+	Signin         Template
+	Me             Template
+	Forgot         Template
+	CheckEmail     Template
 }
 
 type User struct {
 	Templates      UserTemplates
 	UserService    *models.UserService
 	SessionService *models.SessionService
+	PasswordResetService *models.PasswordResetService
+	EmailService *models.EmailService
 }
 
 func (u User) GetSignup(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +40,20 @@ func (u User) GetSignin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (u User) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	err := u.Templates.Forgot.Execute(w, r, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (u User) CheckEmail(w http.ResponseWriter, r *http.Request) {
+	err := u.Templates.CheckEmail.Execute(w, r, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 func (u User) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	log.Printf("Current user: %s\n", user.Email)
@@ -44,6 +63,34 @@ func (u User) CurrentUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (u User) PostForgotPassword(w http.ResponseWriter, r *http.Request) {
+	email := r.FormValue("email")
+
+	log.Printf("forgot password email %v", email)
+
+	reset, err := u.PasswordResetService.Create(email)
+	if err != nil {
+		log.Printf("create password reset token: %v", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	queryParams := url.Values{
+		"email": {email},
+		"token": {reset.Token},
+	}
+	resetLink := fmt.Sprintf("http://localhost:3000/reset?%v", queryParams.Encode())
+
+	err = u.EmailService.SendResetEmail(email, resetLink)
+	if err != nil {
+		log.Printf("send reset email: %v", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/checkemail", http.StatusSeeOther)
 }
 
 func (u User) PostSignin(w http.ResponseWriter, r *http.Request) {
