@@ -109,7 +109,7 @@ func main() {
 			Signin: views.Must(views.Parse("signin.gohtml", "tailwind.gohtml")),
 			Me:     views.Must(views.Parse("me.gohtml", "tailwind.gohtml")),
 			Forgot: views.Must(views.Parse("forgot.gohtml", "tailwind.gohtml")),
-			CheckEmail: views.Must(views.Parse("checkemail.gohtml", "tailwind.gohtml")),
+			CheckEmail: views.Must(views.Parse("check-email.gohtml", "tailwind.gohtml")),
 		},
 		UserService:    &userService,
 		SessionService: &sessionService,
