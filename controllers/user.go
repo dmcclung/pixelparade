@@ -11,37 +11,37 @@ import (
 )
 
 type UserTemplates struct {
-	Signup         Template
-	Signin         Template
+	SignUp         Template
+	SignIn         Template
 	Me             Template
-	Forgot         Template
+	ForgotPassword Template
 	CheckEmail     Template
 }
 
 type User struct {
-	Templates      UserTemplates
-	UserService    *models.UserService
-	SessionService *models.SessionService
+	Templates            UserTemplates
+	UserService          *models.UserService
+	SessionService       *models.SessionService
 	PasswordResetService *models.PasswordResetService
-	EmailService *models.EmailService
+	EmailService         *models.EmailService
 }
 
-func (u User) GetSignup(w http.ResponseWriter, r *http.Request) {
-	err := u.Templates.Signup.Execute(w, r, nil)
+func (u User) GetSignUp(w http.ResponseWriter, r *http.Request) {
+	err := u.Templates.SignUp.Execute(w, r, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-func (u User) GetSignin(w http.ResponseWriter, r *http.Request) {
-	err := u.Templates.Signin.Execute(w, r, nil)
+func (u User) GetSignIn(w http.ResponseWriter, r *http.Request) {
+	err := u.Templates.SignIn.Execute(w, r, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func (u User) ForgotPassword(w http.ResponseWriter, r *http.Request) {
-	err := u.Templates.Forgot.Execute(w, r, nil)
+	err := u.Templates.ForgotPassword.Execute(w, r, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -93,7 +93,7 @@ func (u User) PostForgotPassword(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/checkemail", http.StatusSeeOther)
 }
 
-func (u User) PostSignin(w http.ResponseWriter, r *http.Request) {
+func (u User) PostSignIn(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
@@ -119,7 +119,7 @@ func (u User) PostSignin(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (u User) PostSignout(w http.ResponseWriter, r *http.Request) {
+func (u User) PostSignOut(w http.ResponseWriter, r *http.Request) {
 	token, err := readCookie(r, CookieSession)
 	if err != nil {
 		log.Printf("signout: %v\n", err)
@@ -139,7 +139,7 @@ func (u User) PostSignout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (u User) PostSignup(w http.ResponseWriter, r *http.Request) {
+func (u User) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 	user, err := u.UserService.Create(email, password)

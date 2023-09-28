@@ -18,7 +18,7 @@ type config struct {
 	PSQL models.PostgresConfig
 	SMTP models.SMTPConfig
 	CSRF struct {
-		Key string
+		Key    string
 		Secure bool
 	}
 	Server struct {
@@ -105,25 +105,25 @@ func main() {
 
 	userController := controllers.User{
 		Templates: controllers.UserTemplates{
-			Signup: views.Must(views.Parse("signup.gohtml", "tailwind.gohtml")),
-			Signin: views.Must(views.Parse("signin.gohtml", "tailwind.gohtml")),
-			Me:     views.Must(views.Parse("me.gohtml", "tailwind.gohtml")),
-			Forgot: views.Must(views.Parse("forgot.gohtml", "tailwind.gohtml")),
-			CheckEmail: views.Must(views.Parse("check-email.gohtml", "tailwind.gohtml")),
+			SignUp:         views.Must(views.Parse("sign-up.gohtml", "tailwind.gohtml")),
+			SignIn:         views.Must(views.Parse("sign-in.gohtml", "tailwind.gohtml")),
+			Me:             views.Must(views.Parse("me.gohtml", "tailwind.gohtml")),
+			ForgotPassword: views.Must(views.Parse("forgot-password.gohtml", "tailwind.gohtml")),
+			CheckEmail:     views.Must(views.Parse("check-email.gohtml", "tailwind.gohtml")),
 		},
-		UserService:    &userService,
-		SessionService: &sessionService,
+		UserService:          &userService,
+		SessionService:       &sessionService,
 		PasswordResetService: &passwordResetService,
-		EmailService: emailService,
+		EmailService:         emailService,
 	}
-	r.Get("/signup", userController.GetSignup)
-	r.Post("/signup", userController.PostSignup)
-	r.Get("/signin", userController.GetSignin)
-	r.Post("/signin", userController.PostSignin)
-	r.Post("/signout", userController.PostSignout)
-	r.Get("/forgot", userController.ForgotPassword)
-	r.Post("/forgot", userController.PostForgotPassword)
-	r.Get("/checkemail", userController.CheckEmail)
+	r.Get("/signup", userController.GetSignUp)
+	r.Post("/signup", userController.PostSignUp)
+	r.Get("/signin", userController.GetSignIn)
+	r.Post("/signin", userController.PostSignIn)
+	r.Post("/signout", userController.PostSignOut)
+	r.Get("/forgot-password", userController.ForgotPassword)
+	r.Post("/forgot-password", userController.PostForgotPassword)
+	r.Get("/check-email", userController.CheckEmail)
 
 	r.Route("/users/me", func(r chi.Router) {
 		r.Use(umw.RequireUser)
