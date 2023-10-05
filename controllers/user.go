@@ -42,11 +42,10 @@ func (u User) GetSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u User) ResetPassword(w http.ResponseWriter, r *http.Request) {
-	var data struct {
-		Token string
+	err := u.Templates.ResetPassword.Execute(w, r, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	data.Token = r.FormValue("token")
-	u.Templates.ResetPassword.Execute(w, r, data)
 }
 
 func (u User) PostResetPassword(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +62,13 @@ func (u User) PostResetPassword(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
-	// TODO: Update the user's password
+	
+	err = u.UserService.UpdatePassword(user.ID, data.Password)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Error updating password", http.StatusInternalServerError)
+		return
+	}
 
 	session, err := u.SessionService.Create(user.ID)
 	if err != nil {
