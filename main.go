@@ -110,6 +110,7 @@ func main() {
 			Me:             views.Must(views.Parse("me.gohtml", "tailwind.gohtml")),
 			ForgotPassword: views.Must(views.Parse("forgot-password.gohtml", "tailwind.gohtml")),
 			CheckEmail:     views.Must(views.Parse("check-email.gohtml", "tailwind.gohtml")),
+			ResetPassword:  views.Must(views.Parse("reset-password.gohtml", "tailwind.gohtml")),
 		},
 		UserService:          &userService,
 		SessionService:       &sessionService,
@@ -124,6 +125,8 @@ func main() {
 	r.Get("/forgot-password", userController.ForgotPassword)
 	r.Post("/forgot-password", userController.PostForgotPassword)
 	r.Get("/check-email", userController.CheckEmail)
+	r.Get("/reset-password", userController.ResetPassword)
+	r.Post("/reset-password", userController.PostResetPassword)
 
 	r.Route("/users/me", func(r chi.Router) {
 		r.Use(umw.RequireUser)
