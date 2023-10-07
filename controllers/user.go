@@ -28,14 +28,14 @@ type User struct {
 	EmailService         *models.EmailService
 }
 
-func (u User) GetSignUp(w http.ResponseWriter, r *http.Request) {
+func (u User) SignUp(w http.ResponseWriter, r *http.Request) {
 	err := u.Templates.SignUp.Execute(w, r, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-func (u User) GetSignIn(w http.ResponseWriter, r *http.Request) {
+func (u User) SignIn(w http.ResponseWriter, r *http.Request) {
 	err := u.Templates.SignIn.Execute(w, r, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -59,7 +59,7 @@ func (u User) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (u User) PostResetPassword(w http.ResponseWriter, r *http.Request) {
+func (u User) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Token    string
 		Password string
@@ -115,7 +115,7 @@ func (u User) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (u User) PostForgotPassword(w http.ResponseWriter, r *http.Request) {
+func (u User) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 
 	log.Printf("forgot password email %v", email)
@@ -143,7 +143,7 @@ func (u User) PostForgotPassword(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/check-email", http.StatusSeeOther)
 }
 
-func (u User) PostSignIn(w http.ResponseWriter, r *http.Request) {
+func (u User) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
@@ -169,7 +169,7 @@ func (u User) PostSignIn(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (u User) PostSignOut(w http.ResponseWriter, r *http.Request) {
+func (u User) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 	token, err := readCookie(r, CookieSession)
 	if err != nil {
 		log.Printf("signout: %v\n", err)
@@ -189,7 +189,7 @@ func (u User) PostSignOut(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (u User) PostSignUp(w http.ResponseWriter, r *http.Request) {
+func (u User) ProcessSignUp(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 	user, err := u.UserService.Create(email, password)

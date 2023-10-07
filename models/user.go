@@ -21,24 +21,22 @@ type UserService struct {
 	DB *sql.DB
 }
 
-var (
-	ErrEmailTaken = errors.New("models: email address is already in use")
+const (
+	createUserSql = `INSERT INTO users (email, password) 
+		VALUES ($1, $2) RETURNING id;`
+
+	getUserSql = `SELECT id, email, password FROM users 
+		WHERE email = $1`
+
+	deleteUserSql = `DELETE FROM users 
+		WHERE email = $1`
+
+	updateUserSql = `UPDATE users SET email = $1, password = $2 
+		WHERE email = $3`
+
+	updatePasswordSql = `UPDATE users SET password = $1
+		WHERE id = $2`
 )
-
-var createUserSql = `INSERT INTO users (email, password) 
-	VALUES ($1, $2) RETURNING id;`
-
-var getUserSql = `SELECT id, email, password FROM users 
-	WHERE email = $1`
-
-var deleteUserSql = `DELETE FROM users 
-	WHERE email = $1`
-
-var updateUserSql = `UPDATE users SET email = $1, password = $2 
-	WHERE email = $3`
-
-var updatePasswordSql = `UPDATE users SET password = $1
-	WHERE id = $2`
 
 func (u *UserService) UpdatePassword(userID, password string) error {
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)

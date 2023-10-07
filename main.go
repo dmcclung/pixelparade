@@ -67,6 +67,10 @@ func main() {
 		DB: db,
 	}
 
+	galleryService := models.GalleryService{
+		DB: db,
+	}
+
 	emailService, err := models.GetEmailService(config.SMTP)
 	if err != nil {
 		panic(err)
@@ -117,16 +121,16 @@ func main() {
 		PasswordResetService: &passwordResetService,
 		EmailService:         emailService,
 	}
-	r.Get("/signup", userController.GetSignUp)
-	r.Post("/signup", userController.PostSignUp)
-	r.Get("/signin", userController.GetSignIn)
-	r.Post("/signin", userController.PostSignIn)
-	r.Post("/signout", userController.PostSignOut)
+	r.Get("/signup", userController.SignUp)
+	r.Post("/signup", userController.ProcessSignUp)
+	r.Get("/signin", userController.SignIn)
+	r.Post("/signin", userController.ProcessSignIn)
+	r.Post("/signout", userController.ProcessSignOut)
 	r.Get("/forgot-password", userController.ForgotPassword)
-	r.Post("/forgot-password", userController.PostForgotPassword)
+	r.Post("/forgot-password", userController.ProcessForgotPassword)
 	r.Get("/check-email", userController.CheckEmail)
 	r.Get("/reset-password", userController.ResetPassword)
-	r.Post("/reset-password", userController.PostResetPassword)
+	r.Post("/reset-password", userController.ProcessResetPassword)
 
 	r.Route("/users/me", func(r chi.Router) {
 		r.Use(umw.RequireUser)
@@ -134,11 +138,17 @@ func main() {
 	})
 
 	galleryController := controllers.Gallery{
-		Templates: struct{ Get controllers.Template }{
-			Get: views.Must(views.Parse("gallery.gohtml", "tailwind.gohtml")),
+		Templates: controllers.GalleryTemplates{
+			NewGallery:   views.Must(views.Parse("new-gallery.gohtml", "tailwind.gohtml")),
+			GetGalleries: views.Must(views.Parse("galleries.gohtml", "tailwind.gohtml")),
+			GetGallery:   views.Must(views.Parse("gallery.gohtml", "tailwind.gohtml")),
 		},
+		GalleryService: &galleryService,
 	}
+	r.Get("/galleries", galleryController.GetGalleries)
 	r.Get("/gallery/{id}", galleryController.Get)
+	r.Get("/gallery", galleryController.New)
+	r.Post("/gallery", galleryController.ProcessNewGallery)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Page not found", http.StatusNotFound)
