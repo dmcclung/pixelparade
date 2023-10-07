@@ -40,6 +40,9 @@ func Parse(name ...string) (Template, error) {
 			"currentUser": func() (*models.User, error) {
 				return nil, fmt.Errorf("currentUser not implemented")
 			},
+			"errors": func() error {
+				return fmt.Errorf("errors not implemented")
+			},
 		},
 	)
 	t, err := t.ParseFS(templates.FS, name...)
@@ -64,6 +67,13 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 			},
 			"currentUser": func() *models.User {
 				return context.User(r.Context())
+			},
+			"errors": func() []string {
+				var errors = []string{
+					"The email address you provided is already associated with an account.",
+					"Something went wrong.",
+				}
+				return errors
 			},
 		},
 	)
