@@ -42,7 +42,17 @@ func (u User) GetSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u User) ResetPassword(w http.ResponseWriter, r *http.Request) {
-	err := u.Templates.ResetPassword.Execute(w, r, nil)
+	var data struct {
+		Token  string
+		Email  string
+		Tab    string
+		Header string
+	}
+	data.Token = r.FormValue("token")
+	data.Email = r.FormValue("email")
+	data.Tab = "Dashboard"
+	data.Header = ""
+	err := u.Templates.ResetPassword.Execute(w, r, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -50,7 +60,7 @@ func (u User) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 func (u User) PostResetPassword(w http.ResponseWriter, r *http.Request) {
 	var data struct {
-		Token string
+		Token    string
 		Password string
 	}
 	data.Token = r.FormValue("token")
@@ -62,7 +72,7 @@ func (u User) PostResetPassword(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
-	
+
 	err = u.UserService.UpdatePassword(user.ID, data.Password)
 	if err != nil {
 		fmt.Println(err)
@@ -120,7 +130,7 @@ func (u User) PostForgotPassword(w http.ResponseWriter, r *http.Request) {
 		"email": {email},
 		"token": {reset.Token},
 	}
-	resetLink := fmt.Sprintf("http://localhost:3000/reset?%v", queryParams.Encode())
+	resetLink := fmt.Sprintf("http://localhost:3000/reset-password?%v", queryParams.Encode())
 
 	err = u.EmailService.SendResetEmail(email, resetLink)
 	if err != nil {
@@ -129,7 +139,7 @@ func (u User) PostForgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/checkemail", http.StatusSeeOther)
+	http.Redirect(w, r, "/check-email", http.StatusSeeOther)
 }
 
 func (u User) PostSignIn(w http.ResponseWriter, r *http.Request) {

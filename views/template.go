@@ -30,21 +30,6 @@ func Must(t Template, err error) Template {
 	return t
 }
 
-func dict(values ...interface{}) (map[string]interface{}, error) {
-	if len(values)%2 != 0 {
-		return nil, fmt.Errorf("dictionary parameters must be key value pairs")
-	}
-	dict := make(map[string]interface{})
-	for i := 0; i < len(values) - 1; i += 2 {
-		key, ok := values[i].(string)
-		if !ok {
-			return nil, fmt.Errorf("dictionary keys must be strings")
-		}
-		dict[key] = values[i+1]
-	}
-	return dict, nil
-}
-
 func Parse(name ...string) (Template, error) {
 	t := template.New(name[0])
 	t = t.Funcs(
@@ -55,7 +40,6 @@ func Parse(name ...string) (Template, error) {
 			"currentUser": func() (*models.User, error) {
 				return nil, fmt.Errorf("currentUser not implemented")
 			},
-			"dict": dict,
 		},
 	)
 	t, err := t.ParseFS(templates.FS, name...)
@@ -81,7 +65,6 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 			"currentUser": func() *models.User {
 				return context.User(r.Context())
 			},
-			"dict": dict,
 		},
 	)
 

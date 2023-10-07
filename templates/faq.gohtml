@@ -1,4 +1,4 @@
-{{template "header" (dict "Tab" "FAQ" "Header" "Frequently Asked Questions")}}
+{{template "header" .}}
 <div class="mx-auto max-w-7xl divide-y divide-gray-900/10 px-6 lg:px-8">
 	<dl class="mt-10 space-y-8 divide-y divide-gray-900/10">
 		{{range .}} {{template "qa" .}} {{end}}
