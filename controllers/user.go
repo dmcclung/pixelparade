@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/dmcclung/pixelparade/context"
+	"github.com/dmcclung/pixelparade/errors"
 	"github.com/dmcclung/pixelparade/models"
 )
 
@@ -193,8 +194,13 @@ func (u User) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	user, err := u.UserService.Create(email, password)
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		if errors.Is(err, models.ErrEmailTaken) {
+			err = errors.Public(err, "That email address is already associated with an account")
+		}
+		err := u.Templates.SignUp.Execute(w, r, nil, err)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 

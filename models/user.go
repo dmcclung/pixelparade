@@ -2,9 +2,12 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgerrcode"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -17,6 +20,10 @@ type User struct {
 type UserService struct {
 	DB *sql.DB
 }
+
+var (
+	ErrEmailTaken = errors.New("models: email address is already in use")
+)
 
 var createUserSql = `INSERT INTO users (email, password) 
 	VALUES ($1, $2) RETURNING id;`
@@ -66,8 +73,13 @@ func (u *UserService) Create(email, password string) (*User, error) {
 
 	var id string
 	err = u.DB.QueryRow(createUserSql, email, h).Scan(&id)
-
 	if err != nil {
+		var pgError *pgconn.PgError
+		if errors.As(err, &pgError) {
+			if pgError.Code == pgerrcode.UniqueViolation {
+				return nil, ErrEmailTaken
+			}
+		}
 		return nil, fmt.Errorf("creating user: %w", err)
 	}
 

@@ -2,6 +2,7 @@ package views
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -17,10 +18,8 @@ type Template struct {
 	htmlTmpl *template.Template
 }
 
-type HeaderData struct {
-	Tab    string
-	Header string
-	User   *models.User
+type public interface {
+	Public() string
 }
 
 func Must(t Template, err error) Template {
@@ -54,11 +53,27 @@ func Parse(name ...string) (Template, error) {
 	}, nil
 }
 
-func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface{}) error {
+func errMessages(errs []error) []string {
+	var errMsgs []string
+	for _, err := range errs {
+		var pubErr public
+		if errors.As(err, &pubErr) {
+			errMsgs = append(errMsgs, pubErr.Public())
+		} else {
+			fmt.Println(err)
+			errMsgs = append(errMsgs, "Something went wrong")
+		}
+	}
+	return errMsgs
+}
+
+func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface{}, errs ...error) error {
 	tmpl, err := t.htmlTmpl.Clone()
 	if err != nil {
 		return fmt.Errorf("cloning template: %w", err)
 	}
+
+	msgs := errMessages(errs)
 
 	tmpl = tmpl.Funcs(
 		template.FuncMap{
@@ -69,11 +84,7 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 				return context.User(r.Context())
 			},
 			"errors": func() []string {
-				var errors = []string{
-					"The email address you provided is already associated with an account.",
-					"Something went wrong.",
-				}
-				return errors
+				return msgs
 			},
 		},
 	)
