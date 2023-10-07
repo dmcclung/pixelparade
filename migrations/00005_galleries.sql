@@ -1,13 +1,13 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS sessions (
+CREATE TABLE IF NOT EXISTS galleries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID UNIQUE REFERENCES users (id) ON DELETE CASCADE,
-    token_hash TEXT UNIQUE NOT NULL
+    title TEXT
 );
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS sessions;
+DROP TABLE galleries;
 -- +goose StatementEnd
