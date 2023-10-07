@@ -14,9 +14,13 @@ type Gallery struct {
 
 func (g Gallery) Get(w http.ResponseWriter, r *http.Request) {
 	galleryId := chi.URLParam(r, "id")
-	err := g.Templates.Get.Execute(w, r, struct{ Id string }{
-		Id: galleryId,
-	})
+
+	var data struct {
+		Id string
+	}
+	data.Id = galleryId
+
+	err := g.Templates.Get.Execute(w, r, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
