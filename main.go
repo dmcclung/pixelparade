@@ -139,15 +139,16 @@ func main() {
 
 	galleryController := controllers.Gallery{
 		Templates: controllers.GalleryTemplates{
-			NewGallery:   views.Must(views.Parse("new-gallery.gohtml", "tailwind.gohtml")),
-			GetGalleries: views.Must(views.Parse("galleries.gohtml", "tailwind.gohtml")),
-			GetGallery:   views.Must(views.Parse("gallery.gohtml", "tailwind.gohtml")),
+			New:          views.Must(views.Parse("galleries/new.gohtml", "tailwind.gohtml")),
+			GetGalleries: views.Must(views.Parse("galleries/galleries.gohtml", "tailwind.gohtml")),
+			GetGallery:   views.Must(views.Parse("galleries/gallery.gohtml", "tailwind.gohtml")),
 		},
 		GalleryService: &galleryService,
 	}
+	
+	r.Get("/galleries/new", galleryController.New)
 	r.Get("/galleries", galleryController.GetGalleries)
 	r.Get("/gallery/{id}", galleryController.Get)
-	r.Get("/gallery", galleryController.New)
 	r.Post("/gallery", galleryController.ProcessNewGallery)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {

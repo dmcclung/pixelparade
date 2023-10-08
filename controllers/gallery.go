@@ -9,7 +9,7 @@ import (
 )
 
 type GalleryTemplates struct {
-	NewGallery   Template
+	New          Template
 	GetGalleries Template
 	GetGallery   Template
 }
@@ -20,7 +20,11 @@ type Gallery struct {
 }
 
 func (g Gallery) New(w http.ResponseWriter, r *http.Request) {
-	err := g.Templates.NewGallery.Execute(w, r, nil)
+	var data struct {
+		Title string
+	}
+	data.Title = r.FormValue("title")
+	err := g.Templates.New.Execute(w, r, data)
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}

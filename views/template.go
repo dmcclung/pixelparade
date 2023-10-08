@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"path/filepath"
 
 	"github.com/dmcclung/pixelparade/context"
 	"github.com/dmcclung/pixelparade/models"
@@ -29,8 +30,8 @@ func Must(t Template, err error) Template {
 	return t
 }
 
-func Parse(name ...string) (Template, error) {
-	t := template.New(name[0])
+func Parse(patterns ...string) (Template, error) {
+	t := template.New(filepath.Base(patterns[0]))
 	t = t.Funcs(
 		template.FuncMap{
 			"csrfField": func() (template.HTML, error) {
@@ -44,7 +45,7 @@ func Parse(name ...string) (Template, error) {
 			},
 		},
 	)
-	t, err := t.ParseFS(templates.FS, name...)
+	t, err := t.ParseFS(templates.FS, patterns...)
 	if err != nil {
 		return Template{}, fmt.Errorf("parsing template: %v", err)
 	}
