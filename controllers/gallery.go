@@ -20,11 +20,17 @@ type Gallery struct {
 }
 
 func (g Gallery) New(w http.ResponseWriter, r *http.Request) {
-
+	err := g.Templates.NewGallery.Execute(w, r, nil)
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 func (g Gallery) GetGalleries(w http.ResponseWriter, r *http.Request) {
-
+	err := g.Templates.GetGalleries.Execute(w, r, nil)
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 func (g Gallery) ProcessNewGallery(w http.ResponseWriter, r *http.Request) {
