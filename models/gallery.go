@@ -21,8 +21,8 @@ func (gs *GalleryService) Create(title, userID string) (*Gallery, error) {
 		UserID: userID,
 	}
 	err := gs.DB.QueryRow(`
-		INSERT INTO galleries (userID, title) VALUES ($1, $2)
-		RETURNING id;`, title, userID).Scan(&gallery.ID)
+		INSERT INTO galleries (user_id, title) VALUES ($1, $2)
+		RETURNING id;`, userID, title).Scan(&gallery.ID)
 	if err != nil {
 		return nil, fmt.Errorf("create gallery: %w", err)
 	}
@@ -72,10 +72,12 @@ func (gs *GalleryService) GetByUser(userID string) ([]*Gallery, error) {
 func (gs *GalleryService) Update(galleryID, title string) (*Gallery, error) {
 	var userID string
 	err := gs.DB.QueryRow(`
-		UPDATE galleries SET title = $1 WHERE id = $2 RETURNING user_id;
-	`).Scan(&userID)
+		UPDATE galleries SET title = $2 WHERE id = $1 RETURNING user_id;
+	`, galleryID, title).Scan(&userID)
 	if err != nil {
-		// TODO: Check for no rows
+		if err == sql.ErrNoRows {
+			return nil, ErrNoGalleryFound
+		}
 		return nil, fmt.Errorf("update gallery: %w", err)
 	}
 
@@ -93,7 +95,6 @@ func (gs *GalleryService) Delete(galleryID string) error {
 		DELETE FROM galleries WHERE id = $1;
 	`, galleryID)
 	if err != nil {
-		// TODO: Check for no rows
 		return fmt.Errorf("delete gallery: %w", err)
 	}
 

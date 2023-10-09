@@ -23,7 +23,7 @@ function tabComponent() {
         headerDisplay: 'Welcome to my Awesome site',
         init() {
             let path = window.location.pathname
-            if (path.includes('gallery') || path.includes('galleries')) {
+            if (path.includes('galleries')) {
                 this.currentTab = 'Gallery'
                 this.headerDisplay = 'Gallery'
             } else if (path.includes('contact')) {
@@ -208,7 +208,7 @@ function tabComponent() {
           x-bind:aria-current="currentTab === 'FAQ' ? 'page' : null">
           FAQ
         </a>
-        <a href="/gallery/123"
+        <a href="/galleries"
           :class="{ 'bg-gray-900 text-white': currentTab === 'Gallery', 'text-gray-300 hover:bg-gray-700 hover:text-white': currentTab !== 'Gallery'}" 
           class="block rounded-md px-3 py-2 text-sm font-medium"
           x-bind:aria-current="currentTab === 'Gallery' ? 'page' : null">

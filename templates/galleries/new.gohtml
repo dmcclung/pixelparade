@@ -1,7 +1,10 @@
 {{template "header" .}}
 <div class="overflow-hidden max-w-md mx-auto rounded-lg bg-white shadow">
     <div class="px-4 py-5 sm:p-6">
-        <form action="#" method="post">
+        <form action="/galleries" method="post">
+            <div class="hidden">
+                {{csrfField}}
+            </div>
             <!-- Title Field -->
             <div>
                 <label for="title" class="block text-sm font-medium leading-6 text-gray-900">Title</label>

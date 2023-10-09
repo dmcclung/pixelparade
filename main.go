@@ -84,6 +84,7 @@ func main() {
 		[]byte(config.CSRF.Key),
 		// TODO: Fix this before deploying
 		csrf.Secure(config.CSRF.Secure),
+		csrf.Path("/"),
 	)
 
 	umw := controllers.UserMiddleware{
@@ -139,17 +140,26 @@ func main() {
 
 	galleryController := controllers.Gallery{
 		Templates: controllers.GalleryTemplates{
-			New:          views.Must(views.Parse("galleries/new.gohtml", "tailwind.gohtml")),
-			GetGalleries: views.Must(views.Parse("galleries/galleries.gohtml", "tailwind.gohtml")),
-			GetGallery:   views.Must(views.Parse("galleries/gallery.gohtml", "tailwind.gohtml")),
+			New:   views.Must(views.Parse("galleries/new.gohtml", "tailwind.gohtml")),
+			Edit:  views.Must(views.Parse("galleries/edit.gohtml", "tailwind.gohtml")),
+			Show:  views.Must(views.Parse("galleries/show.gohtml", "tailwind.gohtml")),
+			Index: views.Must(views.Parse("galleries/index.gohtml", "tailwind.gohtml")),
 		},
 		GalleryService: &galleryService,
 	}
-	
-	r.Get("/galleries/new", galleryController.New)
-	r.Get("/galleries", galleryController.GetGalleries)
-	r.Get("/gallery/{id}", galleryController.Get)
-	r.Post("/gallery", galleryController.ProcessNewGallery)
+
+	r.Route("/galleries", func(r chi.Router) {
+		r.Group(func(r chi.Router) {
+			r.Use(umw.RequireUser)
+			r.Get("/", galleryController.Index)
+			r.Get("/new", galleryController.New)
+			r.Post("/", galleryController.Create)
+			r.Get("/{id}/edit", galleryController.Edit)
+			r.Post("/{id}/edit", galleryController.Update)
+			r.Post("/{id}/delete", galleryController.Delete)
+		})
+		r.Get("/{id}", galleryController.Show)
+	})
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Page not found", http.StatusNotFound)
