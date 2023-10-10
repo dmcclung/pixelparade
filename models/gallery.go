@@ -69,25 +69,15 @@ func (gs *GalleryService) GetByUser(userID string) ([]*Gallery, error) {
 	return galleries, nil
 }
 
-func (gs *GalleryService) Update(galleryID, title string) (*Gallery, error) {
-	var userID string
-	err := gs.DB.QueryRow(`
-		UPDATE galleries SET title = $2 WHERE id = $1 RETURNING user_id;
-	`, galleryID, title).Scan(&userID)
+func (gs *GalleryService) Update(gallery *Gallery) error {
+	_, err := gs.DB.Exec(`
+		UPDATE galleries SET title = $2 WHERE id = $1;
+	`, gallery.ID, gallery.Title)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, ErrNoGalleryFound
-		}
-		return nil, fmt.Errorf("update gallery: %w", err)
+		return fmt.Errorf("update gallery: %w", err)
 	}
 
-	gallery := Gallery{
-		ID:     galleryID,
-		UserID: userID,
-		Title:  title,
-	}
-
-	return &gallery, nil
+	return nil
 }
 
 func (gs *GalleryService) Delete(galleryID string) error {

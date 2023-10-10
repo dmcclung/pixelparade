@@ -155,7 +155,7 @@ func main() {
 			r.Get("/new", galleryController.New)
 			r.Post("/", galleryController.Create)
 			r.Get("/{id}/edit", galleryController.Edit)
-			r.Post("/{id}/edit", galleryController.Update)
+			r.Post("/{id}", galleryController.Update)
 			r.Post("/{id}/delete", galleryController.Delete)
 		})
 		r.Get("/{id}", galleryController.Show)

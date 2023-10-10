@@ -69,18 +69,15 @@ func (g Gallery) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	title := r.FormValue("title")
+	gallery.Title = title
 
-	updatedGallery, err := g.GalleryService.Update(galleryID, title)
+	err = g.GalleryService.Update(gallery)
 	if err != nil {
-		if err == models.ErrNoGalleryFound {
-			http.Error(w, "No gallery found", http.StatusNotFound)
-			return
-		}
 		http.Error(w, "Something went wrong", http.StatusNotFound)
 		return
 	}
 
-	viewPath := fmt.Sprintf("/galleries/%s", updatedGallery.ID)
+	viewPath := fmt.Sprintf("/galleries/%s", gallery.ID)
 	http.Redirect(w, r, viewPath, http.StatusFound)
 }
 
