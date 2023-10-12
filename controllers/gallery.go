@@ -146,10 +146,21 @@ func (g Gallery) Index(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var data struct{
-		Galleries []*models.Gallery
+	type Gallery struct {
+		ID    string
+		Title string
 	}
-	data.Galleries = galleries
+
+	var data struct {
+		Galleries []Gallery
+	}
+
+	for _, gallery := range galleries {
+		data.Galleries = append(data.Galleries, Gallery{
+			ID:    gallery.ID,
+			Title: gallery.Title,
+		})
+	}
 
 	err = g.Templates.Index.Execute(w, r, data)
 	if err != nil {

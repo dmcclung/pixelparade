@@ -98,12 +98,14 @@ function tabComponent() {
                  x-bind:aria-current="currentTab === 'FAQ' ? 'page' : null">
                  FAQ
               </a>
+              {{if currentUser}}
               <a href="/galleries"
                  :class="{ 'bg-gray-900 text-white': currentTab === 'Gallery', 'text-gray-300 hover:bg-gray-700 hover:text-white': currentTab !== 'Gallery'}" 
                  class="rounded-md px-3 py-2 text-sm font-medium"
                  x-bind:aria-current="currentTab === 'Gallery' ? 'page' : null">
                  Gallery
               </a>
+              {{end}}
               <a href="/users/me"
                  :class="{ 'bg-gray-900 text-white': currentTab === 'Me', 'text-gray-300 hover:bg-gray-700 hover:text-white': currentTab !== 'Me'}" 
                  class="rounded-md px-3 py-2 text-sm font-medium"
@@ -208,12 +210,14 @@ function tabComponent() {
           x-bind:aria-current="currentTab === 'FAQ' ? 'page' : null">
           FAQ
         </a>
+        {{if currentUser}}
         <a href="/galleries"
           :class="{ 'bg-gray-900 text-white': currentTab === 'Gallery', 'text-gray-300 hover:bg-gray-700 hover:text-white': currentTab !== 'Gallery'}" 
           class="block rounded-md px-3 py-2 text-sm font-medium"
           x-bind:aria-current="currentTab === 'Gallery' ? 'page' : null">
           Gallery
         </a>
+        {{end}}
         <a href="/users/me"
           :class="{ 'bg-gray-900 text-white': currentTab === 'Me', 'text-gray-300 hover:bg-gray-700 hover:text-white': currentTab !== 'Me'}" 
           class="block rounded-md px-3 py-2 text-sm font-medium"
