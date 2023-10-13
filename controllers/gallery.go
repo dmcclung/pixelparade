@@ -173,16 +173,22 @@ func (g Gallery) Show(w http.ResponseWriter, r *http.Request) {
 
 	gallery, err := g.GalleryService.Get(galleryID)
 	if err != nil {
-		// TODO: return home?
 		if errors.Is(err, models.ErrNoGalleryFound) {
 			http.Error(w, "No gallery found", http.StatusNotFound)
+			return
 		}
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
 	}
 
 	var data struct {
-		Title string
+		Title  string
+		Images []string
 	}
 	data.Title = gallery.Title
+	for i := 0; i < 10; i++ {
+		data.Images = append(data.Images, fmt.Sprintf("https://placekitten.com/200/%d", 300+i))
+	}
 
 	err = g.Templates.Show.Execute(w, r, data)
 	if err != nil {

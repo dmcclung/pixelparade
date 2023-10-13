@@ -12,38 +12,39 @@
   {{range .Galleries}}
   <li class="relative">
     <div class="group aspect-h-7 aspect-w-10 block w-full overflow-hidden rounded-lg bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100">
-        <div class="relative"> <!-- New wrapping div -->
-            <img src="https://images.unsplash.com/photo-1582053433976-25c00369fc93?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=512&q=80" alt="" class="pointer-events-none object-cover group-hover:opacity-75">
-            <button onclick="location.href='/galleries/{{.ID}}';" type="button" class="absolute inset-0 focus:outline-none">
-                <span class="sr-only">Show {{.Title}}</span>
-            </button>
-        </div>
-        <p class="pointer-events-none mt-2 block truncate text-sm font-medium text-gray-900">{{.Title}}</p>
+    <div class="relative"> <!-- New wrapping div -->
+        <img src="https://images.unsplash.com/photo-1582053433976-25c00369fc93?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=512&q=80" alt="" class="pointer-events-none object-cover group-hover:opacity-75 rounded-lg">
+        <button onclick="location.href='/galleries/{{.ID}}';" type="button" class="absolute inset-0 focus:outline-none">
+            <span class="sr-only">Show {{.Title}}</span>
+        </button>
+    </div>
+    <div class="flex items-center mt-2"> <!-- Flex container for title and buttons -->
+        <p class="pointer-events-none flex-grow truncate text-sm font-medium text-gray-900">{{.Title}}</p>
         <a class="
-          py-1 px-2
+          py-1 px-2 mr-2
           bg-yellow-100 hover:bg-yellow-200
           rounded border border-yellow-600
           text-xs text-yellow-600"
         href="/galleries/{{.ID}}/edit"
-      >
-        Edit
-      </a>
-      <form action="/galleries/{{.ID}}/delete" method="post"
-        onsubmit="return confirm('Do you really want to delete this gallery?');">
-        <div class="hidden">{{csrfField}}</div>
-        <button type="submit"
-          class="
-            py-1 px-2
-            bg-red-100 hover:bg-red-200
-            rounded border border-red-600
-            text-xs text-red-600"
         >
-          Delete
-        </button>
-      </form>
+            Edit
+        </a>
+        <form action="/galleries/{{.ID}}/delete" method="post"
+          onsubmit="return confirm('Do you really want to delete this gallery?');">
+            <div class="hidden">{{csrfField}}</div>
+            <button type="submit"
+              class="
+                py-1 px-2 m-2
+                bg-red-100 hover:bg-red-200
+                rounded border border-red-600
+                text-xs text-red-600"
+            >
+                Delete
+            </button>
+        </form>
     </div>
-</li>
-
+    </div>
+  </li>
   {{end}}
 </ul>
 {{else}}
