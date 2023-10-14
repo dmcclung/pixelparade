@@ -49,7 +49,9 @@ func (g Gallery) Create(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/galleries", http.StatusFound)
 }
 
-func (g Gallery) galleryByID(w http.ResponseWriter, r *http.Request) (*models.Gallery, error) {
+type galleryOption func (w http.ResponseWriter, r *http.Request, gallery *models.Gallery) error
+
+func (g Gallery) galleryByID(w http.ResponseWriter, r *http.Request, opts ...galleryOption) (*models.Gallery, error) {
 	galleryID := chi.URLParam(r, "id")
 	gallery, err := g.GalleryService.Get(galleryID)
 	if err != nil {
@@ -60,18 +62,29 @@ func (g Gallery) galleryByID(w http.ResponseWriter, r *http.Request) (*models.Ga
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return nil, err
 	}
+
+	for _, opt := range opts {
+		err = opt(w, r, gallery)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return gallery, nil
 }
 
-func (g Gallery) Update(w http.ResponseWriter, r *http.Request) {
-	gallery, err := g.galleryByID(w, r)
-	if err != nil {
-		return
-	}
-
+func userMustOwnGallery(w http.ResponseWriter, r *http.Request, gallery *models.Gallery) error {
 	user := context.User(r.Context())
 	if gallery.UserID != user.ID {
 		http.Error(w, "You are not authorized to update this gallery", http.StatusUnauthorized)
+		return fmt.Errorf("User does not have access to this gallery")
+	}
+	return nil
+}
+
+func (g Gallery) Update(w http.ResponseWriter, r *http.Request) {
+	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
+	if err != nil {
 		return
 	}
 
@@ -89,14 +102,8 @@ func (g Gallery) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g Gallery) Edit(w http.ResponseWriter, r *http.Request) {
-	gallery, err := g.galleryByID(w, r)
+	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
 	if err != nil {
-		return
-	}
-
-	user := context.User(r.Context())
-	if gallery.UserID != user.ID {
-		http.Error(w, "You are not authorized to edit this gallery", http.StatusUnauthorized)
 		return
 	}
 
@@ -112,16 +119,11 @@ func (g Gallery) Edit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g Gallery) Delete(w http.ResponseWriter, r *http.Request) {
-	gallery, err := g.galleryByID(w, r)
+	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
 	if err != nil {
 		return
 	}
 
-	user := context.User(r.Context())
-	if gallery.UserID != user.ID {
-		http.Error(w, "You are not authorized to edit this gallery", http.StatusUnauthorized)
-		return
-	}
 	err = g.GalleryService.Delete(gallery.ID)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
