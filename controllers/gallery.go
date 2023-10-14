@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -50,15 +49,23 @@ func (g Gallery) Create(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/galleries", http.StatusFound)
 }
 
-func (g Gallery) Update(w http.ResponseWriter, r *http.Request) {
+func (g Gallery) galleryByID(w http.ResponseWriter, r *http.Request) (*models.Gallery, error) {
 	galleryID := chi.URLParam(r, "id")
 	gallery, err := g.GalleryService.Get(galleryID)
 	if err != nil {
 		if err == models.ErrNoGalleryFound {
 			http.Error(w, "Gallery not found", http.StatusNotFound)
-			return
+			return nil, err
 		}
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return nil, err
+	}
+	return gallery, nil
+}
+
+func (g Gallery) Update(w http.ResponseWriter, r *http.Request) {
+	gallery, err := g.galleryByID(w, r)
+	if err != nil {
 		return
 	}
 
@@ -82,14 +89,8 @@ func (g Gallery) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g Gallery) Edit(w http.ResponseWriter, r *http.Request) {
-	galleryID := chi.URLParam(r, "id")
-	gallery, err := g.GalleryService.Get(galleryID)
+	gallery, err := g.galleryByID(w, r)
 	if err != nil {
-		if err == models.ErrNoGalleryFound {
-			http.Error(w, "Gallery not found", http.StatusNotFound)
-			return
-		}
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 
@@ -111,14 +112,8 @@ func (g Gallery) Edit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g Gallery) Delete(w http.ResponseWriter, r *http.Request) {
-	galleryID := chi.URLParam(r, "id")
-	gallery, err := g.GalleryService.Get(galleryID)
+	gallery, err := g.galleryByID(w, r)
 	if err != nil {
-		if err == models.ErrNoGalleryFound {
-			http.Error(w, "Gallery not found", http.StatusNotFound)
-			return
-		}
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 
@@ -127,7 +122,7 @@ func (g Gallery) Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "You are not authorized to edit this gallery", http.StatusUnauthorized)
 		return
 	}
-	err = g.GalleryService.Delete(galleryID)
+	err = g.GalleryService.Delete(gallery.ID)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
@@ -169,15 +164,8 @@ func (g Gallery) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g Gallery) Show(w http.ResponseWriter, r *http.Request) {
-	galleryID := chi.URLParam(r, "id")
-
-	gallery, err := g.GalleryService.Get(galleryID)
+	gallery, err := g.galleryByID(w, r)
 	if err != nil {
-		if errors.Is(err, models.ErrNoGalleryFound) {
-			http.Error(w, "No gallery found", http.StatusNotFound)
-			return
-		}
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 
