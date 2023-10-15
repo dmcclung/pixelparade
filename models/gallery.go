@@ -3,6 +3,8 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"path/filepath"
+	"strings"
 )
 
 type Gallery struct {
@@ -13,6 +15,53 @@ type Gallery struct {
 
 type GalleryService struct {
 	DB *sql.DB
+	ImagesDir string
+}
+
+type Image struct {
+	Path string
+}
+
+func hasExtension(file string, extensions []string) bool {
+	for _, ext := range extensions {
+		file = strings.ToLower(file)
+		ext = strings.ToLower(ext)
+		if filepath.Ext(file) == ext {
+			return true
+		}
+	}
+	return false
+}
+
+func (gs *GalleryService) Images(id string) ([]Image, error) {
+	globPath := filepath.Join(gs.galleryDir(id), "*")
+	paths, err := filepath.Glob(globPath)
+	if err != nil {
+		return nil, fmt.Errorf("list images: %w", err)
+	}
+
+	var images []Image
+	for _, path := range paths {
+		if hasExtension(path, gs.extensions()) {
+			images = append(images, Image{
+				Path: path,
+			})
+		}
+	}
+
+	return images, nil
+}
+
+func (gs *GalleryService) extensions() []string {
+	return []string{".jpg", ".png", ".jpeg", ".gif"}
+}
+
+func (gs *GalleryService) galleryDir(id string) string {
+	imagesDir := gs.ImagesDir
+	if imagesDir == "" {
+		imagesDir = "images"
+	}
+	return filepath.Join(imagesDir, fmt.Sprintf("gallery-%s", id))
 }
 
 func (gs *GalleryService) Create(title, userID string) (*Gallery, error) {
