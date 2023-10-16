@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 
 	"github.com/dmcclung/pixelparade/context"
 	"github.com/dmcclung/pixelparade/models"
@@ -49,7 +50,7 @@ func (g Gallery) Create(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/galleries", http.StatusFound)
 }
 
-type galleryOption func (w http.ResponseWriter, r *http.Request, gallery *models.Gallery) error
+type galleryOption func(w http.ResponseWriter, r *http.Request, gallery *models.Gallery) error
 
 func (g Gallery) galleryByID(w http.ResponseWriter, r *http.Request, opts ...galleryOption) (*models.Gallery, error) {
 	galleryID := chi.URLParam(r, "id")
@@ -171,17 +172,41 @@ func (g Gallery) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	type Image struct {
+		GalleryID string
+		Filename  string
+	}
+
 	var data struct {
 		Title  string
-		Images []string
+		Images []Image
 	}
 	data.Title = gallery.Title
-	for i := 0; i < 10; i++ {
-		data.Images = append(data.Images, fmt.Sprintf("https://placekitten.com/200/%d", 300+i))
+
+	images, err := g.GalleryService.Images(gallery.ID)
+	if err != nil {
+		fmt.Print(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	for _, image := range images {
+		data.Images = append(data.Images, Image{
+			GalleryID: gallery.ID,
+			Filename:  image.Filename,
+		})
 	}
 
 	err = g.Templates.Show.Execute(w, r, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func (g Gallery) Image(w http.ResponseWriter, r *http.Request) {
+	galleryID := chi.URLParam(r, "id")
+	filename := chi.URLParam(r, "filename")
+
+	path := filepath.Join(g.GalleryService.GalleryDir(galleryID), filename)
+	http.ServeFile(w, r, path)
 }

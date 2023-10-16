@@ -14,12 +14,14 @@ type Gallery struct {
 }
 
 type GalleryService struct {
-	DB *sql.DB
+	DB        *sql.DB
 	ImagesDir string
 }
 
 type Image struct {
-	Path string
+	Path      string
+	GalleryID string
+	Filename  string
 }
 
 func hasExtension(file string, extensions []string) bool {
@@ -34,7 +36,7 @@ func hasExtension(file string, extensions []string) bool {
 }
 
 func (gs *GalleryService) Images(id string) ([]Image, error) {
-	globPath := filepath.Join(gs.galleryDir(id), "*")
+	globPath := filepath.Join(gs.GalleryDir(id), "*")
 	paths, err := filepath.Glob(globPath)
 	if err != nil {
 		return nil, fmt.Errorf("list images: %w", err)
@@ -44,7 +46,9 @@ func (gs *GalleryService) Images(id string) ([]Image, error) {
 	for _, path := range paths {
 		if hasExtension(path, gs.extensions()) {
 			images = append(images, Image{
-				Path: path,
+				Path:      path,
+				Filename:  filepath.Base(path),
+				GalleryID: id,
 			})
 		}
 	}
@@ -56,7 +60,7 @@ func (gs *GalleryService) extensions() []string {
 	return []string{".jpg", ".png", ".jpeg", ".gif"}
 }
 
-func (gs *GalleryService) galleryDir(id string) string {
+func (gs *GalleryService) GalleryDir(id string) string {
 	imagesDir := gs.ImagesDir
 	if imagesDir == "" {
 		imagesDir = "images"

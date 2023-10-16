@@ -159,6 +159,7 @@ func main() {
 			r.Post("/{id}/delete", galleryController.Delete)
 		})
 		r.Get("/{id}", galleryController.Show)
+		r.Get("/{id}/{filename}", galleryController.Image)
 	})
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
