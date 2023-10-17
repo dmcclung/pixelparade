@@ -3,9 +3,10 @@ package controllers
 import (
 	"fmt"
 	"net/http"
-	"path/filepath"
+	"net/url"
 
 	"github.com/dmcclung/pixelparade/context"
+	"github.com/dmcclung/pixelparade/errors"
 	"github.com/dmcclung/pixelparade/models"
 	"github.com/go-chi/chi/v5"
 )
@@ -56,7 +57,7 @@ func (g Gallery) galleryByID(w http.ResponseWriter, r *http.Request, opts ...gal
 	galleryID := chi.URLParam(r, "id")
 	gallery, err := g.GalleryService.Get(galleryID)
 	if err != nil {
-		if err == models.ErrNoGalleryFound {
+		if errors.Is(err, models.ErrNoGalleryFound) {
 			http.Error(w, "Gallery not found", http.StatusNotFound)
 			return nil, err
 		}
@@ -137,7 +138,7 @@ func (g Gallery) Index(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	galleries, err := g.GalleryService.GetByUser(user.ID)
 	if err != nil {
-		if err == models.ErrNoGalleries {
+		if errors.Is(err, models.ErrNoGalleries) {
 			galleries = []*models.Gallery{}
 		} else {
 			http.Error(w, "Something went wrong", http.StatusInternalServerError)
@@ -193,7 +194,7 @@ func (g Gallery) Show(w http.ResponseWriter, r *http.Request) {
 	for _, image := range images {
 		data.Images = append(data.Images, Image{
 			GalleryID: gallery.ID,
-			Filename:  image.Filename,
+			Filename:  url.PathEscape(image.Filename),
 		})
 	}
 
@@ -207,6 +208,22 @@ func (g Gallery) Image(w http.ResponseWriter, r *http.Request) {
 	galleryID := chi.URLParam(r, "id")
 	filename := chi.URLParam(r, "filename")
 
-	path := filepath.Join(g.GalleryService.GalleryDir(galleryID), filename)
+	unescapedFilename, err := url.PathUnescape(filename)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	path, err := g.GalleryService.ImagePath(galleryID, unescapedFilename)
+	if err != nil {
+		if errors.Is(err, models.ErrImageNotFound) {
+			http.Error(w, "Image not found", http.StatusNotFound)
+			return
+		}
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
 	http.ServeFile(w, r, path)
 }

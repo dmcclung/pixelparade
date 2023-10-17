@@ -3,8 +3,12 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/dmcclung/pixelparade/errors"
 )
 
 type Gallery struct {
@@ -36,7 +40,7 @@ func hasExtension(file string, extensions []string) bool {
 }
 
 func (gs *GalleryService) Images(id string) ([]Image, error) {
-	globPath := filepath.Join(gs.GalleryDir(id), "*")
+	globPath := filepath.Join(gs.galleryDir(id), "*")
 	paths, err := filepath.Glob(globPath)
 	if err != nil {
 		return nil, fmt.Errorf("list images: %w", err)
@@ -60,12 +64,26 @@ func (gs *GalleryService) extensions() []string {
 	return []string{".jpg", ".png", ".jpeg", ".gif"}
 }
 
-func (gs *GalleryService) GalleryDir(id string) string {
+func (gs *GalleryService) galleryDir(id string) string {
 	imagesDir := gs.ImagesDir
 	if imagesDir == "" {
 		imagesDir = "images"
 	}
 	return filepath.Join(imagesDir, fmt.Sprintf("gallery-%s", id))
+}
+
+func (gs *GalleryService) ImagePath(galleryID, filename string) (string, error) {
+	path := filepath.Join(gs.galleryDir(galleryID), filename)
+
+	_, err := os.Stat(path)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return "", ErrImageNotFound
+		}
+		return "", fmt.Errorf("image exists: %w", err)
+	}
+
+	return path, nil
 }
 
 func (gs *GalleryService) Create(title, userID string) (*Gallery, error) {
@@ -90,7 +108,7 @@ func (gs *GalleryService) Get(galleryID string) (*Gallery, error) {
 		SELECT user_id, title FROM galleries WHERE id = $1;
 	`, galleryID).Scan(&gallery.UserID, &gallery.Title)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNoGalleryFound
 		}
 		return nil, fmt.Errorf("get gallery: %w", err)
@@ -104,7 +122,7 @@ func (gs *GalleryService) GetByUser(userID string) ([]*Gallery, error) {
 		SELECT id, user_id, title FROM galleries WHERE user_id = $1;
 	`, userID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNoGalleries
 		}
 		return nil, fmt.Errorf("get user galleries: %w", err)
