@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -86,6 +87,18 @@ func (gs *GalleryService) ImagePath(galleryID, filename string) (string, error) 
 	return path, nil
 }
 
+func (gs *GalleryService) DeleteImage(galleryID, filename string) error {
+	path, err := gs.ImagePath(galleryID, filename)
+	if err != nil {
+		return fmt.Errorf("delete image: %w", err)
+	}
+	err = os.Remove(path)
+	if err != nil {
+		return fmt.Errorf("delete image: %w", err)
+	}
+	return nil
+}
+
 func (gs *GalleryService) Create(title, userID string) (*Gallery, error) {
 	gallery := Gallery{
 		Title:  title,
@@ -147,6 +160,25 @@ func (gs *GalleryService) Update(gallery *Gallery) error {
 	if err != nil {
 		return fmt.Errorf("update gallery: %w", err)
 	}
+
+	return nil
+}
+
+func (gs *GalleryService) CreateImage(galleryID, filename string, file io.Reader) error {
+	galleryDir := gs.galleryDir(galleryID)
+	err := os.MkdirAll(galleryDir, 0755)
+	if err != nil {
+		return fmt.Errorf("create gallery dir: %w", err)
+	}
+
+	dstPath := filepath.Join(galleryDir, filename)
+	dst, err := os.Create(dstPath)
+	if err != nil {
+		fmt.Println(err)
+		return fmt.Errorf("create uploaded image: %w", err)
+	}
+	defer dst.Close()
+	io.Copy(dst, file)
 
 	return nil
 }

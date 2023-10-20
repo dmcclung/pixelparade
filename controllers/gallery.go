@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 
 	"github.com/dmcclung/pixelparade/context"
 	"github.com/dmcclung/pixelparade/errors"
@@ -52,6 +53,46 @@ func (g Gallery) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 type galleryOption func(w http.ResponseWriter, r *http.Request, gallery *models.Gallery) error
+
+func (g Gallery) filename(w http.ResponseWriter, r *http.Request) string {
+	filename := chi.URLParam(r, "filename")
+	return filepath.Base(filename)
+}
+
+func (g Gallery) CreateImage(w http.ResponseWriter, r *http.Request) {
+	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
+	if err != nil {
+		return
+	}
+
+	err = r.ParseMultipartForm(5 << 20)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusBadRequest)
+		return
+	}
+
+	fileHeaders := r.MultipartForm.File["images"]
+	for _, fileHeader := range fileHeaders {
+		filename := fileHeader.Filename
+		file, err := fileHeader.Open()
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Something went wrong", http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
+
+		err = g.GalleryService.CreateImage(gallery.ID, filename, file)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			return
+		}
+	}
+	
+	http.Redirect(w, r, fmt.Sprintf("/galleries/%s/edit", gallery.ID), http.StatusFound)
+}
 
 func (g Gallery) galleryByID(w http.ResponseWriter, r *http.Request, opts ...galleryOption) (*models.Gallery, error) {
 	galleryID := chi.URLParam(r, "id")
@@ -140,6 +181,24 @@ func (g Gallery) Edit(w http.ResponseWriter, r *http.Request) {
 	g.Templates.Edit.Execute(w, r, data)
 }
 
+func (g Gallery) DeleteImage(w http.ResponseWriter, r *http.Request) {
+	filename := g.filename(w, r)
+	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
+	if err != nil {
+		return
+	}
+
+	// call into service and delete the image
+	err = g.GalleryService.DeleteImage(gallery.ID, filename)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+	redirect := fmt.Sprintf("/galleries/%s/edit", gallery.ID)
+	http.Redirect(w, r, redirect, http.StatusFound)
+}
+
 func (g Gallery) Delete(w http.ResponseWriter, r *http.Request) {
 	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
 	if err != nil {
@@ -226,7 +285,7 @@ func (g Gallery) Show(w http.ResponseWriter, r *http.Request) {
 
 func (g Gallery) Image(w http.ResponseWriter, r *http.Request) {
 	galleryID := chi.URLParam(r, "id")
-	filename := chi.URLParam(r, "filename")
+	filename := g.filename(w, r)
 
 	unescapedFilename, err := url.PathUnescape(filename)
 	if err != nil {

@@ -26,11 +26,17 @@
             <button type="submit" class="rounded-md bg-red-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">Delete</button>
         </form>
         <div class="py-4">
+            {{template "upload_image_form" .}}
+        </div>
+        <div class="py-4">
             <h2 class="pb-2 text-sm font-semibold text-gray-800">Current Images</h2>
             <div class="py-2 grid grid-cols-8 gap-2">
             {{range .Images}}
                 <div class="h-min w-full relative">
-                <img class="w-full" src="/galleries/{{.GalleryID}}/{{.Filename}}">
+                    <div class="absolute top-2 right-2">
+					    {{template "delete_image_form" .}}
+				    </div>
+                    <img class="w-full" src="/galleries/{{.GalleryID}}/{{.Filename}}">
                 </div>
             {{end}}
             </div>
@@ -38,3 +44,52 @@
     </div>
 </div>
 {{template "footer" .}}
+
+{{define "delete_image_form"}}
+<form action="/galleries/{{.GalleryID}}/{{.Filename}}/delete"
+  method="post"
+  onsubmit="return confirm('Do you really want to delete this image?');">
+  {{csrfField}}
+  <button
+    type="submit"
+    class="
+      p-1
+      text-xs text-red-800
+      bg-red-100
+      border border-red-400
+      rounded
+    "
+  >
+    Delete
+  </button>
+</form>
+{{end}}
+
+{{define "upload_image_form"}}
+<form action="/galleries/{{.ID}}/images"
+  method="post"
+  enctype="multipart/form-data">
+  {{csrfField}}
+  <div class="py-2">
+    <label for="images" class="block mb-2 text-sm font-semibold text-gray-800">
+      Add Images
+      <p class="py-2 text-xs text-gray-600 font-normal">
+        Please only upload jpg, png, and gif files.
+      </p>
+    </label>
+    <input type="file" multiple
+      accept="image/png, image/jpeg, image/gif"
+      id="images" name="images" />
+  </div>
+  <button
+    type="submit"
+    class="
+      py-2 px-8
+      bg-indigo-600 hover:bg-indigo-700
+      text-white text-lg font-bold
+      rounded
+    ">
+    Upload
+  </button>
+</form>
+{{end}}
