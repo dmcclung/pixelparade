@@ -84,10 +84,10 @@ func (u User) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 	session, err := u.SessionService.Create(user.ID)
 	if err != nil {
 		fmt.Println(err)
-		http.Redirect(w, r, "/signin", http.StatusFound)
+		http.Redirect(w, r, "/signin", http.StatusSeeOther)
 	}
 	setCookie(w, CookieSession, session.Token)
-	http.Redirect(w, r, "/users/me", http.StatusFound)
+	http.Redirect(w, r, "/users/me", http.StatusSeeOther)
 }
 
 func (u User) ForgotPassword(w http.ResponseWriter, r *http.Request) {
@@ -166,7 +166,7 @@ func (u User) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	setCookie(w, CookieSession, session.Token)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/galleries", http.StatusSeeOther)
 }
 
 func (u User) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
@@ -214,7 +214,7 @@ func (u User) ProcessSignUp(w http.ResponseWriter, r *http.Request) {
 	log.Printf("User signup %v, %v\n", user.Email, user.Password)
 
 	setCookie(w, "session", session.Token)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/galleries", http.StatusSeeOther)
 }
 
 type UserMiddleware struct {

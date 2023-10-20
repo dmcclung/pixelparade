@@ -49,7 +49,7 @@ func (g Gallery) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/galleries", http.StatusFound)
+	http.Redirect(w, r, "/galleries", http.StatusSeeOther)
 }
 
 type galleryOption func(w http.ResponseWriter, r *http.Request, gallery *models.Gallery) error
@@ -81,17 +81,23 @@ func (g Gallery) CreateImage(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Something went wrong", http.StatusBadRequest)
 			return
 		}
-		defer file.Close()
+		defer file.Close()		
 
 		err = g.GalleryService.CreateImage(gallery.ID, filename, file)
 		if err != nil {
+			var fileError models.FileError
+			if errors.As(err, &fileError) {
+				fmt.Println(err)
+				http.Error(w, fileError.Issue, http.StatusBadRequest)
+				return
+			}
 			fmt.Println(err)
 			http.Error(w, "Something went wrong", http.StatusInternalServerError)
 			return
 		}
 	}
 	
-	http.Redirect(w, r, fmt.Sprintf("/galleries/%s/edit", gallery.ID), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("/galleries/%s/edit", gallery.ID), http.StatusSeeOther)
 }
 
 func (g Gallery) galleryByID(w http.ResponseWriter, r *http.Request, opts ...galleryOption) (*models.Gallery, error) {
@@ -141,7 +147,7 @@ func (g Gallery) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	viewPath := fmt.Sprintf("/galleries/%s", gallery.ID)
-	http.Redirect(w, r, viewPath, http.StatusFound)
+	http.Redirect(w, r, viewPath, http.StatusSeeOther)
 }
 
 func (g Gallery) Edit(w http.ResponseWriter, r *http.Request) {
@@ -196,7 +202,7 @@ func (g Gallery) DeleteImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	redirect := fmt.Sprintf("/galleries/%s/edit", gallery.ID)
-	http.Redirect(w, r, redirect, http.StatusFound)
+	http.Redirect(w, r, redirect, http.StatusSeeOther)
 }
 
 func (g Gallery) Delete(w http.ResponseWriter, r *http.Request) {
@@ -210,7 +216,7 @@ func (g Gallery) Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/galleries", http.StatusFound)
+	http.Redirect(w, r, "/galleries", http.StatusSeeOther)
 }
 
 func (g Gallery) Index(w http.ResponseWriter, r *http.Request) {

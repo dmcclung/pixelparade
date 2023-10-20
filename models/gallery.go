@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -63,6 +64,10 @@ func (gs *GalleryService) Images(id string) ([]Image, error) {
 
 func (gs *GalleryService) extensions() []string {
 	return []string{".jpg", ".png", ".jpeg", ".gif"}
+}
+
+func (gs *GalleryService) imageContentTypes() []string {
+	return []string{"image/png", "image/jpeg", "image/gif"}
 }
 
 func (gs *GalleryService) galleryDir(id string) string {
@@ -164,9 +169,51 @@ func (gs *GalleryService) Update(gallery *Gallery) error {
 	return nil
 }
 
-func (gs *GalleryService) CreateImage(galleryID, filename string, file io.Reader) error {
+func checkContentType(r io.ReadSeeker, allowedContentTypes []string) error {
+	buf := make([]byte, 512)
+	_, err := r.Read(buf)
+	if err != nil {
+		return fmt.Errorf("detecting content type: %w", err)
+	}
+	contentType := http.DetectContentType(buf)
+	_, err = r.Seek(0, io.SeekStart)
+	if err != nil {
+		return fmt.Errorf("detecting content type: %w", err)
+	}
+	
+	for _, allowedContentType := range allowedContentTypes {
+		if contentType == allowedContentType {
+			return nil
+		}
+	}
+	
+	return FileError{
+		Issue: fmt.Sprintf("found %s content type, but expected %v", contentType, allowedContentTypes),
+	}
+}
+
+func checkExtension(filename string, allowedExtensions []string) error {
+	if !hasExtension(filename, allowedExtensions) {
+		return FileError{
+			Issue: fmt.Sprintf("invalid extension: %v", filepath.Ext(filename)),
+		}
+	}
+	return nil
+}
+
+func (gs *GalleryService) CreateImage(galleryID, filename string, file io.ReadSeeker) error {
+	err := checkContentType(file, gs.imageContentTypes())
+	if err != nil {
+		return fmt.Errorf("create image: %w", err)
+	}
+
+	err = checkExtension(filename, gs.extensions())
+	if err != nil {
+		return fmt.Errorf("create image: %w", err)
+	}
+
 	galleryDir := gs.galleryDir(galleryID)
-	err := os.MkdirAll(galleryDir, 0755)
+	err = os.MkdirAll(galleryDir, 0755)
 	if err != nil {
 		return fmt.Errorf("create gallery dir: %w", err)
 	}
@@ -175,7 +222,7 @@ func (gs *GalleryService) CreateImage(galleryID, filename string, file io.Reader
 	dst, err := os.Create(dstPath)
 	if err != nil {
 		fmt.Println(err)
-		return fmt.Errorf("create uploaded image: %w", err)
+		return fmt.Errorf("create image: %w", err)
 	}
 	defer dst.Close()
 	io.Copy(dst, file)
@@ -189,6 +236,11 @@ func (gs *GalleryService) Delete(galleryID string) error {
 	`, galleryID)
 	if err != nil {
 		return fmt.Errorf("delete gallery: %w", err)
+	}
+
+	err = os.RemoveAll(gs.galleryDir(galleryID))
+	if err != nil {
+		return fmt.Errorf("delete gallery images: %w", err)
 	}
 
 	return nil
