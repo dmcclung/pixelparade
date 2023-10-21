@@ -81,7 +81,7 @@ func (g Gallery) CreateImage(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Something went wrong", http.StatusBadRequest)
 			return
 		}
-		defer file.Close()		
+		defer file.Close()
 
 		err = g.GalleryService.CreateImage(gallery.ID, filename, file)
 		if err != nil {
@@ -96,7 +96,7 @@ func (g Gallery) CreateImage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	
+
 	http.Redirect(w, r, fmt.Sprintf("/galleries/%s/edit", gallery.ID), http.StatusSeeOther)
 }
 
@@ -158,12 +158,12 @@ func (g Gallery) Edit(w http.ResponseWriter, r *http.Request) {
 
 	type Image struct {
 		GalleryID string
-		Filename string
+		Filename  string
 	}
 
 	data := struct {
-		ID    string
-		Title string
+		ID     string
+		Title  string
 		Images []Image
 	}{
 		ID:    gallery.ID,
@@ -180,7 +180,7 @@ func (g Gallery) Edit(w http.ResponseWriter, r *http.Request) {
 	for _, image := range images {
 		data.Images = append(data.Images, Image{
 			GalleryID: image.GalleryID,
-			Filename: url.PathEscape(image.Filename),
+			Filename:  url.PathEscape(image.Filename),
 		})
 	}
 

@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/go-mail/mail/v2"
-	"github.com/joho/godotenv"
 )
 
 const (
@@ -30,10 +29,6 @@ type Email struct {
 
 func GetEmailConfig() (SMTPConfig, error) {
 	var config SMTPConfig
-	err := godotenv.Load()
-	if err != nil {
-		return config, fmt.Errorf("loading env: %w", err)
-	}
 
 	host, exists := os.LookupEnv("EMAIL_HOST")
 	if !exists {
@@ -57,9 +52,9 @@ func GetEmailConfig() (SMTPConfig, error) {
 	}
 	config.User = user
 
-	pass, exists := os.LookupEnv("EMAIL_PASS")
+	pass, exists := os.LookupEnv("EMAIL_PASSWORD")
 	if !exists {
-		return config, fmt.Errorf("EMAIL_PASS environment var not found")
+		return config, fmt.Errorf("EMAIL_PASSWORD environment var not found")
 	}
 	config.Pass = pass
 

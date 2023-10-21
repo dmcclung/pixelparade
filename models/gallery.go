@@ -180,13 +180,13 @@ func checkContentType(r io.ReadSeeker, allowedContentTypes []string) error {
 	if err != nil {
 		return fmt.Errorf("detecting content type: %w", err)
 	}
-	
+
 	for _, allowedContentType := range allowedContentTypes {
 		if contentType == allowedContentType {
 			return nil
 		}
 	}
-	
+
 	return FileError{
 		Issue: fmt.Sprintf("found %s content type, but expected %v", contentType, allowedContentTypes),
 	}

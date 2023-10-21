@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/dmcclung/pixelparade/controllers"
 	"github.com/dmcclung/pixelparade/models"
@@ -10,6 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/csrf"
+	"github.com/joho/godotenv"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -28,16 +30,33 @@ type config struct {
 
 func loadEnvConfig() (config, error) {
 	var cfg config
-	cfg.PSQL = models.DefaultPostgresConfig
+	err := godotenv.Load()
+	if err != nil {
+		return cfg, fmt.Errorf("loading env: %w", err)
+	}
+
+	cfg.PSQL = models.PostgresConfig{
+		Host:     os.Getenv("PSQL_HOST"),
+		Port:     os.Getenv("PSQL_PORT"),
+		User:     os.Getenv("PSQL_USER"),
+		Password: os.Getenv("PSQL_PASSWORD"),
+		Database: os.Getenv("PSQL_DATABASE"),
+		SSLMode:  os.Getenv("PSQL_SSLMODE"),
+	}
+
+	if cfg.PSQL.Host == "" || cfg.PSQL.Port == "" {
+		return cfg, fmt.Errorf("no postgres configuration found")
+	}
+
 	smtpConfig, err := models.GetEmailConfig()
 	if err != nil {
 		return cfg, err
 	}
 	cfg.SMTP = smtpConfig
-	cfg.CSRF.Key = "gFvi45R4fy5xNBlnEeZtQbfAVCYEIAUX"
-	cfg.CSRF.Secure = false
+	cfg.CSRF.Key = os.Getenv("CSRF_KEY")
+	cfg.CSRF.Secure = os.Getenv("CSRF_SECURE") == "true"
 
-	cfg.Server.Address = ":3000"
+	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
 
 	return cfg, nil
 }
