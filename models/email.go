@@ -16,7 +16,7 @@ type SMTPConfig struct {
 	Host string
 	Port int
 	User string
-	Pass string
+	Password string
 }
 
 type Email struct {
@@ -52,11 +52,11 @@ func GetEmailConfig() (SMTPConfig, error) {
 	}
 	config.User = user
 
-	pass, exists := os.LookupEnv("EMAIL_PASSWORD")
+	password, exists := os.LookupEnv("EMAIL_PASSWORD")
 	if !exists {
 		return config, fmt.Errorf("EMAIL_PASSWORD environment var not found")
 	}
-	config.Pass = pass
+	config.Password = password
 
 	return config, nil
 }
@@ -67,7 +67,7 @@ type EmailService struct {
 }
 
 func GetEmailService(config SMTPConfig) (*EmailService, error) {
-	dialer := mail.NewDialer(config.Host, config.Port, config.User, config.Pass)
+	dialer := mail.NewDialer(config.Host, config.Port, config.User, config.Password)
 
 	return &EmailService{
 		dialer: dialer,
