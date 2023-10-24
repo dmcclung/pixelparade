@@ -115,6 +115,9 @@ func main() {
 	r.Use(csrfMw)
 	r.Use(umw.SetUser)
 
+	assetsHandler := http.FileServer(http.Dir("assets"))
+	r.Get("/assets/*", http.StripPrefix("/assets", assetsHandler).ServeHTTP)
+
 	r.Get("/", controllers.Static(
 		views.Must(views.Parse("home.gohtml", "tailwind.gohtml")),
 	))
