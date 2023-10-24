@@ -61,21 +61,16 @@ func loadEnvConfig() (config, error) {
 	return cfg, nil
 }
 
-func main() {
-	config, err := loadEnvConfig()
+func run(cfg config) error {
+	db, err := models.Open(cfg.PSQL)
 	if err != nil {
-		panic(err)
-	}
-
-	db, err := models.Open(config.PSQL)
-	if err != nil {
-		panic(err)
+		return err
 	}
 	defer db.Close()
 
 	err = models.Migrate(db)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	userService := models.UserService{
@@ -90,9 +85,9 @@ func main() {
 		DB: db,
 	}
 
-	emailService, err := models.GetEmailService(config.SMTP)
+	emailService, err := models.GetEmailService(cfg.SMTP)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	passwordResetService := models.PasswordResetService{
@@ -100,9 +95,9 @@ func main() {
 	}
 
 	csrfMw := csrf.Protect(
-		[]byte(config.CSRF.Key),
+		[]byte(cfg.CSRF.Key),
 		// TODO: Fix this before deploying
-		csrf.Secure(config.CSRF.Secure),
+		csrf.Secure(cfg.CSRF.Secure),
 		csrf.Path("/"),
 	)
 
@@ -191,7 +186,17 @@ func main() {
 	})
 
 	fmt.Println("Starting the server on :3000...")
-	err = http.ListenAndServe(config.Server.Address, r)
+	err = http.ListenAndServe(cfg.Server.Address, r)
+	return err
+}
+
+func main() {
+	cfg, err := loadEnvConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	err = run(cfg)
 	if err != nil {
 		panic(err)
 	}
