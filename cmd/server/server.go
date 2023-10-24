@@ -186,8 +186,7 @@ func run(cfg config) error {
 	})
 
 	fmt.Println("Starting the server on :3000...")
-	err = http.ListenAndServe(cfg.Server.Address, r)
-	return err
+	return http.ListenAndServe(cfg.Server.Address, r)
 }
 
 func main() {
