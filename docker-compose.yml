@@ -2,16 +2,6 @@
 version: "3.9"
 
 services:
-  tailwind:
-    build:
-      context: ./tailwind
-      dockerfile: Dockerfile
-    tty: true
-    restart: always
-    volumes:
-      - ./tailwind:/src
-      - ./assets:/dst
-      - ./templates:/templates
   db:
     image: postgres
     restart: always
