@@ -1,11 +1,29 @@
 #!/bin/bash
 
-while read oldrev newrev ref
+# The post-receive hook is called after receive-pack has accepted a pack and the
+# repository has been updated. It is passed arguments in through stdin in the
+# form "oldrev newrev refname".
+
+# Read the input
+while read oldrev newrev refname
 do
-if [[ $ref =~ .*/main$ ]];
-then
-echo "Deploying main branch to production..."
-else
-echo "Ref $ref successfully received, but only the main branch will be deployed."
-fi
+  echo "Old revision: $oldrev"
+  echo "New revision: $newrev"
+  echo "Ref name: $refname"
+
+  # Do something based on the branch name
+  if [[ $refname == "refs/heads/main" ]]; then
+    echo "The main branch was updated."
+    # Add custom logic here for when the main branch is updated
+  elif [[ $refname == "refs/tags/"* ]]; then
+    echo "A tag was updated/created."
+    # Add custom logic here for when a tag is updated/created
+  else
+    echo "Some other ref was updated."
+    # Add custom logic here for other refs
+  fi
 done
+
+# Add any additional logic needed after all the updates have been processed
+
+# End of script
