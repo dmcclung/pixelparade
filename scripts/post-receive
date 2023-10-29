@@ -14,6 +14,34 @@ do
   # Do something based on the branch name
   if [[ $refname == "refs/heads/main" ]]; then
     echo "The main branch was updated."
+    
+    cd ~/apps/pixelparade.xyz
+    
+    echo "Deploying main branch to production..."
+    
+    git --work-tree=$HOME/apps/pixelparade.xyz \
+        --git-dir=$HOME/repos/pixelparade.git \
+        checkout -f main
+
+    echo "Restarting services..."
+    
+    docker compose \
+      -f docker-compose.yml \
+      -f docker-compose.production.yml \
+      up --build --force-recreate -d
+
+    echo "Services restarted."
+
+    docker compose \
+      -f docker-compose.yml \
+      -f docker-compose.production.yml \
+      ls
+
+    docker compose \
+      -f docker-compose.yml \
+      -f docker-compose.production.yml \
+      ps
+
     # Add custom logic here for when the main branch is updated
   elif [[ $refname == "refs/tags/"* ]]; then
     echo "A tag was updated/created."
