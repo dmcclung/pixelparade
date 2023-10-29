@@ -1,3 +1,5 @@
-:80
+# For local development :80
+# Use domain here otherwise
+pixelparade.xyz
 
 reverse_proxy server:3000
