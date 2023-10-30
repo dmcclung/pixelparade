@@ -1,14 +1,15 @@
 version: "3.9"
 
-services:
-  x-logging:
+x-logging:
     &highlight-logging
-    driver: fluentd
-    options:
-        fluentd-address: "otel.highlight.io:24224"
-        fluentd-async: "true"
-        fluentd-sub-second-precision: "true"
-        tag: "highlight.project_id=ney3jvjd"
+      driver: fluentd
+      options:
+          fluentd-address: "otel.highlight.io:24224"
+          fluentd-async: "true"
+          fluentd-sub-second-precision: "true"
+          tag: "highlight.project_id=ney3jvjd"
+
+services:
   server:
     build:
       context: ./
