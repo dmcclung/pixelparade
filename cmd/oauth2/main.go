@@ -4,15 +4,27 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
+	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dropboxID := os.Getenv("DROPBOX_APP_ID")
+	dropboxSecret := os.Getenv("DROPBOX_APP_SECRET")
+
+	// TODO: Set scopes and handle Apple OAuth2
+
 	ctx := context.Background()
 	conf := &oauth2.Config{
-		ClientID:     "YOUR_CLIENT_ID",
-		ClientSecret: "YOUR_CLIENT_SECRET",
+		ClientID:     dropboxID,
+		ClientSecret: dropboxSecret,
 		Scopes:       []string{"SCOPE1", "SCOPE2"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://provider.com/o/oauth2/auth",
