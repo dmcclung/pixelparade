@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -11,6 +12,13 @@ import (
 
 type Oauth struct {
 	ProviderConfigs map[string]*oauth2.Config
+}
+
+func redirectURI(r *http.Request, provider string) string {
+	if r.Host == "localhost:3000" {
+		return fmt.Sprintf("http://localhost:3000/oauth/%s/redirect", provider)
+	}
+	return fmt.Sprintf("https://pixelparade.xyz/oauth/%s/redirect",  provider)
 }
 
 func (oa Oauth) Connect(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +35,7 @@ func (oa Oauth) Connect(w http.ResponseWriter, r *http.Request) {
 	setCookie(w, "oauth_state", state)
 	url := config.AuthCodeURL(
 		state, 
-		oauth2.SetAuthURLParam("redirect_uri", "http://localhost:3000/oauth/dropbox/redirect"),
+		oauth2.SetAuthURLParam("redirect_uri", redirectURI(r, provider)),
 	)
 	http.Redirect(w, r, url, http.StatusSeeOther)
 }
