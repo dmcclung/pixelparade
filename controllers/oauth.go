@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -16,8 +17,11 @@ type Oauth struct {
 }
 
 func redirectURI(r *http.Request, provider string) string {
+	log.Printf("Determining redirect URI from %s\n", r.Host)
 	if r.Host == "localhost:3000" {
 		return fmt.Sprintf("http://localhost:3000/oauth/%s/redirect", provider)
+	} else if r.Host == "dev.pixelparade.xyz" {
+		return fmt.Sprintf("https://dev.pixelparade.xyz/oauth/%s/redirect", provider)
 	}
 	return fmt.Sprintf("https://pixelparade.xyz/oauth/%s/redirect",  provider)
 }
@@ -37,11 +41,14 @@ func (oa Oauth) Connect(w http.ResponseWriter, r *http.Request) {
 	// TODO: Store this in the database for exchange?
 	// verifier := oauth2.GenerateVerifier()
 
+	redirectURI := redirectURI(r, provider)
+	log.Println(redirectURI)
+
 	state := csrf.Token(r)
 	setCookie(w, "oauth_state", state)
 	url := config.AuthCodeURL(
 		state, 
-		oauth2.SetAuthURLParam("redirect_uri", redirectURI(r, provider)),
+		oauth2.SetAuthURLParam("redirect_uri", redirectURI),
 		oauth2.AccessTypeOffline, 
 		oauth2.SetAuthURLParam("token_access_type", "offline"),
 		// oauth2.S256ChallengeOption(verifier),
@@ -71,8 +78,14 @@ func (oa Oauth) Redirect(w http.ResponseWriter, r *http.Request) {
 	deleteCookie(w, "oauth_state")
 
 	code := r.FormValue("code")
-	token, err := config.Exchange(r.Context(), code)
+	token, err := config.Exchange(
+		r.Context(), 
+		code, 
+		oauth2.SetAuthURLParam("redirect_uri", redirectURI(r, provider)),
+	)
+
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Something went wrong", http.StatusBadRequest)
 		return
 	}

@@ -213,7 +213,7 @@ func (u User) ProcessSignUp(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("User signup %v, %v\n", user.Email, user.Password)
 
-	setCookie(w, "session", session.Token)
+	setCookie(w, CookieSession, session.Token)
 	http.Redirect(w, r, "/galleries", http.StatusSeeOther)
 }
 
