@@ -13,9 +13,9 @@ const (
 )
 
 type SMTPConfig struct {
-	Host string
-	Port int
-	User string
+	Host     string
+	Port     int
+	User     string
 	Password string
 }
 
