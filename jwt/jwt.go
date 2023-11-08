@@ -35,30 +35,27 @@ func loadConfig() (*config, error) {
 
 	var ok bool
 	if config.AppleKey, ok = os.LookupEnv("APPLE_KEY"); !ok {
-		return nil, fmt.Errorf("Apple secret key not configured")
+		return nil, fmt.Errorf("apple secret key not configured")
 	}
 	if config.AppleKeyID, ok = os.LookupEnv("APPLE_KEY_ID"); !ok {
-		return nil, fmt.Errorf("Apple key ID not configured")
+		return nil, fmt.Errorf("apple key ID not configured")
 	}
 	if config.AppleAppID, ok = os.LookupEnv("APPLE_APP_ID"); !ok {
-		return nil, fmt.Errorf("Apple app ID not configured")
+		return nil, fmt.Errorf("apple app ID not configured")
 	}
 	if config.AppleTeamID, ok = os.LookupEnv("APPLE_TEAM_ID"); !ok {
-		return nil, fmt.Errorf("Apple team ID not configured")
+		return nil, fmt.Errorf("apple team ID not configured")
 	}
 
 	return &config, nil
 }
 
-func getPrivateKey(keyPath string) (*ecdsa.PrivateKey, error) {
-	keyData, err := os.ReadFile(keyPath)
-	if err != nil {
-		return nil, fmt.Errorf("reading key file: %w", err)
-	}
+func getPrivateKey(keyData string) (*ecdsa.PrivateKey, error) {
+	keyData = strings.ReplaceAll(keyData, "\\n", "\n")
 
-	block, _ := pem.Decode(keyData)
+	block, _ := pem.Decode([]byte(keyData))
 	if block == nil {
-		return nil, fmt.Errorf("decode pem block: %w", err)
+		return nil, fmt.Errorf("error decode pem block")
 	}
 
 	if block.Type != "PRIVATE KEY" {
@@ -72,7 +69,7 @@ func getPrivateKey(keyPath string) (*ecdsa.PrivateKey, error) {
 
 	ecdsaKey, ok := privateKey.(*ecdsa.PrivateKey)
 	if !ok {
-		return nil, fmt.Errorf("Key is not type *ecdsa.PrivateKey")
+		return nil, fmt.Errorf("key is not type *ecdsa.PrivateKey")
 	}
 
 	return ecdsaKey, nil
@@ -177,6 +174,9 @@ func keyFunc(jwks *JWKSet) jwt.Keyfunc {
 
 func GetSubFromJWT(idToken string) (string, error) {
 	jwks, err := fetchApplePublicKeys()
+	if err != nil {
+		return "", fmt.Errorf("fetching apple keys: %w", err)
+	}
 
 	token, err := jwt.ParseWithClaims(idToken, jwt.MapClaims{}, keyFunc(jwks))
 	if err != nil {

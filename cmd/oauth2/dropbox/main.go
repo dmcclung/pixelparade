@@ -39,8 +39,8 @@ func main() {
 
 	// Redirect user to consent page to ask for permission
 	// for the scopes specified above.
-	url := conf.AuthCodeURL("state", 
-		oauth2.AccessTypeOffline, 
+	url := conf.AuthCodeURL("state",
+		oauth2.AccessTypeOffline,
 		oauth2.SetAuthURLParam("token_access_type", "offline"),
 		oauth2.S256ChallengeOption(verifier),
 	)

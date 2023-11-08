@@ -70,8 +70,8 @@ func loadEnvConfig() (config, error) {
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://www.dropbox.com/oauth2/authorize",
 			TokenURL: "https://api.dropboxapi.com/oauth2/token",
-		},		
-	}	
+		},
+	}
 
 	appleSecret, err := jwt.GenerateJWT()
 	if err != nil {
@@ -85,7 +85,7 @@ func loadEnvConfig() (config, error) {
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://appleid.apple.com/auth/authorize",
 			TokenURL: "https://appleid.apple.com/auth/token",
-		},		
+		},
 	}
 
 	cfg.OAuthProviders = providers
