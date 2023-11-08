@@ -12,7 +12,8 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
+	err := godotenv.Load()
+	if err != nil {
 		log.Fatal(err)
 		return
 	}
@@ -28,8 +29,7 @@ func main() {
 		return
 	}
 
-	clientSecret, err := jwt.GenerateJWT()
-	if err != nil {
+	if clientSecret, err = jwt.GenerateJWT(); err != nil {
 		log.Fatal(err)
 		return
 	}
@@ -43,7 +43,7 @@ func main() {
 			AuthURL:  "https://appleid.apple.com/auth/authorize",
 			TokenURL: "https://appleid.apple.com/auth/token",
 		},
-		RedirectURL: "https://pixelparade.xyz/redirect",
+		RedirectURL: "https://pixelparade.xyz/oauth/apple/redirect",
 	}
 
 	// Redirect user to consent page to ask for permission
