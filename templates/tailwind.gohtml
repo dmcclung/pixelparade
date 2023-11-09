@@ -43,6 +43,38 @@ function tabComponent() {
     }
 }
 </script>
+<script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="4rdlzgki0ifwciv"></script>
+<script type="text/javascript">
+  options = {
+    // Required. Called when a user selects an item in the Chooser.
+    success: function(files) {
+        alert("Here's the file link: " + files[0].link)
+    },    
+    
+    linkType: "direct",
+    
+    multiselect: true,
+
+    // Optional. This is a list of file extensions. If specified, the user will
+    // only be able to select files with these extensions. You may also specify
+    // file types, such as "video" or "images" in the list. For more information,
+    // see File types below. By default, all extensions are allowed.
+    extensions: ['images'],
+
+    folderselect: false,
+
+    // Optional. A limit on the size of each file that may be selected, in bytes.
+    // If specified, the user will only be able to select files with size
+    // less than or equal to this limit.
+    // For the purposes of this option, folders have size zero.
+    sizeLimit: 2097152, // or any positive number
+  };
+
+  var button = Dropbox.createChooseButton(options);
+  //document.getElementById("container").appendChild(button);
+  document.body.appendChild(button);
+
+</script>
 <div class="min-h-full" x-data="tabComponent()" x-init="init()">
   {{if errors}}
   <div class="rounded-md bg-red-50 p-4" x-data="{ isVisible: true }" x-show="isVisible">
