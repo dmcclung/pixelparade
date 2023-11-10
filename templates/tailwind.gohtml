@@ -46,28 +46,23 @@ function tabComponent() {
 <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="4rdlzgki0ifwciv"></script>
 <script type="text/javascript">
   const options = {
-    // Required. Called when a user selects an item in the Chooser.
+    
     success: function(files) {
-        alert("Here's the file link: " + files[0].link)
-    },    
+      files.forEach(file => {
+        const input = document.createElement("input")
+        input.type = "hidden"
+        input.name = "files"
+        input.value = file.link
+        dbxForm.appendChild(input)
+      })
+      // TODO: Submit the form
+    },
     
-    linkType: "direct",
-    
-    multiselect: true,
-
-    // Optional. This is a list of file extensions. If specified, the user will
-    // only be able to select files with these extensions. You may also specify
-    // file types, such as "video" or "images" in the list. For more information,
-    // see File types below. By default, all extensions are allowed.
+    linkType: "direct",    
+    multiselect: true,    
     extensions: ['images'],
-
     folderselect: false,
-
-    // Optional. A limit on the size of each file that may be selected, in bytes.
-    // If specified, the user will only be able to select files with size
-    // less than or equal to this limit.
-    // For the purposes of this option, folders have size zero.
-    sizeLimit: 2097152, // or any positive number
+    sizeLimit: 2097152,
   };
 
   function setupDropbox() {
