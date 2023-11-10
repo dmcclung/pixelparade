@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -59,7 +60,7 @@ func (g Gallery) filename(w http.ResponseWriter, r *http.Request) string {
 	return filepath.Base(filename)
 }
 
-func (g Gallery) CreateImage(w http.ResponseWriter, r *http.Request) {
+func (g Gallery) CreateImages(w http.ResponseWriter, r *http.Request) {
 	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
 	if err != nil {
 		return
@@ -217,6 +218,33 @@ func (g Gallery) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/galleries", http.StatusSeeOther)
+}
+
+func (g Gallery) CreateImagesUrl(w http.ResponseWriter, r *http.Request) {
+	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
+	if err != nil {
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		log.Fatal(err)
+		http.Error(w, "Something went wrong", http.StatusBadRequest)
+		return
+	}
+
+	files := r.PostForm["files"]
+	for _, file := range files {
+		log.Printf("Downloading %s...\n", file)
+		err = g.GalleryService.DownloadImage(file, gallery.ID)
+		if err != nil {
+			log.Fatal(err)
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			return
+		}
+	}
+	editPath := fmt.Sprintf("/galleries/%s/edit", gallery.ID)
+	http.Redirect(w, r, editPath, http.StatusSeeOther)
 }
 
 func (g Gallery) Index(w http.ResponseWriter, r *http.Request) {

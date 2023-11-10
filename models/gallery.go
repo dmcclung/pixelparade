@@ -1,6 +1,7 @@
 package models
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/dmcclung/pixelparade/errors"
+	"github.com/google/uuid"
 )
 
 type Gallery struct {
@@ -199,6 +201,29 @@ func checkExtension(filename string, allowedExtensions []string) error {
 		}
 	}
 	return nil
+}
+
+func (gs *GalleryService) DownloadImage(url, galleryID string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return fmt.Errorf("downloading image: url %s: %w", url, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("downloading image: url %s: invalid status code %d", url, resp.StatusCode)
+	}
+
+	filename := uuid.New().String()
+
+	imageBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("reading downloaded image: %w", err)
+	}
+
+	imageFile := bytes.NewReader(imageBytes)
+
+	return gs.CreateImage(galleryID, filename, imageFile)
 }
 
 func (gs *GalleryService) CreateImage(galleryID, filename string, file io.ReadSeeker) error {
