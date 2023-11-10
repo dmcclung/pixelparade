@@ -45,11 +45,7 @@ function tabComponent() {
 </script>
 <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="4rdlzgki0ifwciv"></script>
 <script type="text/javascript">
-  
-
   function setupDropbox() {
-
-
     const dbxChooser = document.getElementById("dropbox-chooser-form")
     if (!dbxChooser) {
       return
@@ -64,7 +60,7 @@ function tabComponent() {
           input.value = file.link
           dbxChooser.appendChild(input)
         })
-        // TODO: Submit the form
+        dbxChooser.submit()
       },
       
       linkType: "direct",    
