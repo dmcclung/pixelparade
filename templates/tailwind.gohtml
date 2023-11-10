@@ -45,7 +45,7 @@ function tabComponent() {
 </script>
 <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="4rdlzgki0ifwciv"></script>
 <script type="text/javascript">
-  options = {
+  const options = {
     // Required. Called when a user selects an item in the Chooser.
     success: function(files) {
         alert("Here's the file link: " + files[0].link)
@@ -70,10 +70,16 @@ function tabComponent() {
     sizeLimit: 2097152, // or any positive number
   };
 
-  var button = Dropbox.createChooseButton(options);
-  //document.getElementById("container").appendChild(button);
-  document.body.appendChild(button);
+  function setupDropbox() {
+    const dbxChooser = document.getElementById("dropbox-chooser-form")
+    if (!dbxChooser) {
+      return
+    }
 
+    var button = Dropbox.createChooseButton(options)
+    dbxChooser.appendChild(button)
+  }
+  setupDropbox()
 </script>
 <div class="min-h-full" x-data="tabComponent()" x-init="init()">
   {{if errors}}

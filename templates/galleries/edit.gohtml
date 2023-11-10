@@ -26,6 +26,9 @@
             <button type="submit" class="rounded-md bg-red-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">Delete</button>
         </form>
         <div class="py-4">
+            {{template "dropbox_image_chooser_form" .}}
+        </div>
+        <div class="py-4">
             {{template "upload_image_form" .}}
         </div>
         <div class="py-4">
@@ -91,5 +94,19 @@
     ">
     Upload
   </button>
+</form>
+{{end}}
+
+{{define "dropbox_image_chooser_form"}}
+<form action="/galleries/{{.ID}}/images/url"
+  method="post"
+  enctype="multipart/form-data"
+  id="dropbox-chooser-form">
+  {{csrfField}}
+  <div class="py-2">
+    <p for="images" class="block mb-2 text-sm font-semibold text-gray-800">
+      Add Dropbox Images
+    </p>
+  </div>
 </form>
 {{end}}
