@@ -45,31 +45,34 @@ function tabComponent() {
 </script>
 <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="4rdlzgki0ifwciv"></script>
 <script type="text/javascript">
-  const options = {
-    
-    success: function(files) {
-      files.forEach(file => {
-        const input = document.createElement("input")
-        input.type = "hidden"
-        input.name = "files"
-        input.value = file.link
-        dbxForm.appendChild(input)
-      })
-      // TODO: Submit the form
-    },
-    
-    linkType: "direct",    
-    multiselect: true,    
-    extensions: ['images'],
-    folderselect: false,
-    sizeLimit: 2097152,
-  };
+  
 
   function setupDropbox() {
+
+
     const dbxChooser = document.getElementById("dropbox-chooser-form")
     if (!dbxChooser) {
       return
     }
+
+    const options = {
+      success: function(files) {
+        files.forEach(file => {
+          const input = document.createElement("input")
+          input.type = "hidden"
+          input.name = "files"
+          input.value = file.link
+          dbxChooser.appendChild(input)
+        })
+        // TODO: Submit the form
+      },
+      
+      linkType: "direct",    
+      multiselect: true,    
+      extensions: ['images'],
+      folderselect: false,
+      sizeLimit: 2097152,
+    };
 
     var button = Dropbox.createChooseButton(options)
     dbxChooser.appendChild(button)
