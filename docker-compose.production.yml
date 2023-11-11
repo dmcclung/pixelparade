@@ -37,4 +37,6 @@ services:
       - 443:443
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
+      - ~/data/pixelparade.xyz/caddy:/data
+      - ~/data/pixelparade.xyz/caddy_config:/config
     logging: *highlight-logging

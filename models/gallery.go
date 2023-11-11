@@ -1,12 +1,14 @@
 package models
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -169,25 +171,21 @@ func (gs *GalleryService) Update(gallery *Gallery) error {
 	return nil
 }
 
-func checkContentType(r io.ReadSeeker, allowedContentTypes []string) error {
+func checkContentType(r io.Reader, allowedContentTypes []string) ([]byte, error) {
 	buf := make([]byte, 512)
-	_, err := r.Read(buf)
+	n, err := r.Read(buf)
 	if err != nil {
-		return fmt.Errorf("detecting content type: %w", err)
-	}
-	contentType := http.DetectContentType(buf)
-	_, err = r.Seek(0, io.SeekStart)
-	if err != nil {
-		return fmt.Errorf("detecting content type: %w", err)
+		return nil, fmt.Errorf("detecting content type: %w", err)
 	}
 
+	contentType := http.DetectContentType(buf)
 	for _, allowedContentType := range allowedContentTypes {
 		if contentType == allowedContentType {
-			return nil
+			return buf[:n], nil
 		}
 	}
 
-	return FileError{
+	return nil, FileError{
 		Issue: fmt.Sprintf("found %s content type, but expected %v", contentType, allowedContentTypes),
 	}
 }
@@ -201,8 +199,24 @@ func checkExtension(filename string, allowedExtensions []string) error {
 	return nil
 }
 
-func (gs *GalleryService) CreateImage(galleryID, filename string, file io.ReadSeeker) error {
-	err := checkContentType(file, gs.imageContentTypes())
+func (gs *GalleryService) DownloadImage(url, galleryID string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return fmt.Errorf("downloading image: url %s: %w", url, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("downloading image: url %s: invalid status code %d", url, resp.StatusCode)
+	}
+
+	filename := path.Base(url)
+
+	return gs.CreateImage(galleryID, filename, resp.Body)
+}
+
+func (gs *GalleryService) CreateImage(galleryID, filename string, file io.Reader) error {
+	buf, err := checkContentType(file, gs.imageContentTypes())
 	if err != nil {
 		return fmt.Errorf("create image: %w", err)
 	}
@@ -225,7 +239,10 @@ func (gs *GalleryService) CreateImage(galleryID, filename string, file io.ReadSe
 		return fmt.Errorf("create image: %w", err)
 	}
 	defer dst.Close()
-	io.Copy(dst, file)
+	_, err = io.Copy(dst, io.MultiReader(bytes.NewReader(buf), file))
+	if err != nil {
+		return fmt.Errorf("copying contents to image: %w", err)
+	}
 
 	return nil
 }

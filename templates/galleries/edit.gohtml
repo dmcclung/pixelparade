@@ -26,6 +26,9 @@
             <button type="submit" class="rounded-md bg-red-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">Delete</button>
         </form>
         <div class="py-4">
+            {{template "dropbox_image_chooser_form" .}}
+        </div>
+        <div class="py-4">
             {{template "upload_image_form" .}}
         </div>
         <div class="py-4">
@@ -92,4 +95,53 @@
     Upload
   </button>
 </form>
+{{end}}
+
+{{define "dropbox_image_chooser_form"}}
+<form action="/galleries/{{.ID}}/images/url"
+  method="post"
+  enctype="multipart/form-data"
+  id="dropbox-chooser-form">
+  {{csrfField}}
+  <div class="py-2">
+    <p for="images" class="block mb-2 text-sm font-semibold text-gray-800">
+      Add Dropbox Images
+    </p>
+  </div>
+</form>
+{{end}}
+
+{{define "custom-footer"}}
+<script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="4rdlzgki0ifwciv"></script>
+<script type="text/javascript">
+  function setupDropbox() {
+    const dbxChooser = document.getElementById("dropbox-chooser-form")
+    if (!dbxChooser) {
+      return
+    }
+
+    const options = {
+      success: function(files) {
+        files.forEach(file => {
+          const input = document.createElement("input")
+          input.type = "hidden"
+          input.name = "files"
+          input.value = file.link
+          dbxChooser.appendChild(input)
+        })
+        dbxChooser.submit()
+      },
+      
+      linkType: "direct",    
+      multiselect: true,    
+      extensions: ['images'],
+      folderselect: false,
+      sizeLimit: 2097152,
+    };
+
+    var button = Dropbox.createChooseButton(options)
+    dbxChooser.appendChild(button)
+  }
+  setupDropbox()  
+</script>
 {{end}}
