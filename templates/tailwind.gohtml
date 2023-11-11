@@ -43,37 +43,6 @@ function tabComponent() {
     }
 }
 </script>
-<script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="4rdlzgki0ifwciv"></script>
-<script type="text/javascript">
-  function setupDropbox() {
-    const dbxChooser = document.getElementById("dropbox-chooser-form")
-    if (!dbxChooser) {
-      return
-    }
-
-    const options = {
-      success: function(files) {
-        files.forEach(file => {
-          const input = document.createElement("input")
-          input.type = "hidden"
-          input.name = "files"
-          input.value = file.link
-          dbxChooser.appendChild(input)
-        })
-        dbxChooser.submit()
-      },
-      
-      linkType: "direct",    
-      multiselect: true,    
-      extensions: ['images'],
-      folderselect: false,
-      sizeLimit: 2097152,
-    };
-
-    var button = Dropbox.createChooseButton(options)
-    dbxChooser.appendChild(button)
-  }  
-</script>
 <div class="min-h-full" x-data="tabComponent()" x-init="init()">
   {{if errors}}
   <div class="rounded-md bg-red-50 p-4" x-data="{ isVisible: true }" x-show="isVisible">
@@ -306,9 +275,7 @@ function tabComponent() {
     </div>
   </main>
 </div>
+{{block "custom-footer" .}}{{end}}
 </body>
-<script>
-  setupDropbox()
-</script>
 </html>
 {{end}}

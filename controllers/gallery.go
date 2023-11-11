@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"sync"
 
 	"github.com/dmcclung/pixelparade/context"
 	"github.com/dmcclung/pixelparade/errors"
@@ -234,15 +235,24 @@ func (g Gallery) CreateImagesUrl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files := r.PostForm["files"]
+
+	var wg sync.WaitGroup
+	wg.Add(len(files))
+
 	for _, file := range files {
-		log.Printf("Downloading %s...\n", file)
-		err = g.GalleryService.DownloadImage(file, gallery.ID)
-		if err != nil {
-			log.Fatal(err)
-			http.Error(w, "Something went wrong", http.StatusInternalServerError)
-			return
-		}
+		imageFile := file
+		go func() {
+			log.Printf("Downloading %s...\n", imageFile)
+			if err := g.GalleryService.DownloadImage(imageFile, gallery.ID); err != nil {
+				log.Fatal(err)
+				// TODO: Use a error group to record error messages
+				// in front end
+				// https://pkg.go.dev/golang.org/x/sync/errgroup
+			}
+			wg.Done()
+		}()
 	}
+	wg.Wait()
 	editPath := fmt.Sprintf("/galleries/%s/edit", gallery.ID)
 	http.Redirect(w, r, editPath, http.StatusSeeOther)
 }
