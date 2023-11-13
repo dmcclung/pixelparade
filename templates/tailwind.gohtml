@@ -19,25 +19,19 @@
 <script>
 function tabComponent() {
     return {
-        currentTab: 'Dashboard',
-        headerDisplay: 'Welcome to my Awesome site',
+        currentTab: 'Dashboard',        
         init() {
             let path = window.location.pathname
             if (path.includes('galleries')) {
                 this.currentTab = 'Gallery'
-                this.headerDisplay = 'Gallery'
             } else if (path.includes('contact')) {
                 this.currentTab = 'Contact'
-                this.headerDisplay = 'Contact'
             } else if (path.includes('faq')) {
                 this.currentTab = 'FAQ'
-                this.headerDisplay = 'Frequently Asked Questions'
             } else if (path.includes('me')) {
                 this.currentTab = 'Me'
-                this.headerDisplay = 'Me'
             } else {
                 this.currentTab = 'Dashboard'
-                this.headerDisplay = 'Welcome to my Awesome site'
             }
         },
     }
@@ -263,7 +257,7 @@ function tabComponent() {
 
   <header class="bg-white shadow">
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 class="text-3xl font-bold tracking-tight text-gray-900" x-text="headerDisplay"></h1>
+      <h1 class="text-3xl font-bold tracking-tight text-gray-900">{{block "headerText" .}}{{end}}</h1>
     </div>
   </header>
   <main>
