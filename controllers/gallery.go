@@ -269,8 +269,9 @@ func (g Gallery) Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type Gallery struct {
-		ID    string
-		Title string
+		ID       string
+		Title    string
+		Filename string
 	}
 
 	var data struct {
@@ -278,9 +279,25 @@ func (g Gallery) Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, gallery := range galleries {
+		//TODO: We only need the filename here
+		images, err := g.GalleryService.Images(gallery.ID)
+		if err != nil {
+			fmt.Print(err)
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			return
+		}
+
+		var image models.Image
+		if len(images) > 0 {
+			image = images[0]
+		}
+
+		// TODO: We need to handle where the image.Filename is ""
+
 		data.Galleries = append(data.Galleries, Gallery{
-			ID:    gallery.ID,
-			Title: gallery.Title,
+			ID:       gallery.ID,
+			Title:    gallery.Title,
+			Filename: url.PathEscape(image.Filename),
 		})
 	}
 
