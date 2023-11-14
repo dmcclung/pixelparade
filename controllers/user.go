@@ -18,6 +18,7 @@ type UserTemplates struct {
 	ForgotPassword Template
 	CheckEmail     Template
 	ResetPassword  Template
+	Settings       Template
 }
 
 type User struct {
@@ -31,14 +32,24 @@ type User struct {
 func (u User) SignUp(w http.ResponseWriter, r *http.Request) {
 	err := u.Templates.SignUp.Execute(w, r, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 	}
 }
 
 func (u User) SignIn(w http.ResponseWriter, r *http.Request) {
 	err := u.Templates.SignIn.Execute(w, r, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+	}
+}
+
+func (u User) Settings(w http.ResponseWriter, r *http.Request) {
+	err := u.Templates.Settings.Execute(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 	}
 }
 
@@ -55,7 +66,8 @@ func (u User) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	data.Header = ""
 	err := u.Templates.ResetPassword.Execute(w, r, data)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 	}
 }
 
@@ -69,21 +81,21 @@ func (u User) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	user, err := u.PasswordResetService.Validate(data.Token)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 
 	err = u.UserService.UpdatePassword(user.ID, data.Password)
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Error updating password", http.StatusInternalServerError)
+		log.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 
 	session, err := u.SessionService.Create(user.ID)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Redirect(w, r, "/signin", http.StatusSeeOther)
 	}
 	setCookie(w, CookieSession, session.Token)
@@ -93,14 +105,16 @@ func (u User) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 func (u User) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	err := u.Templates.ForgotPassword.Execute(w, r, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 	}
 }
 
 func (u User) CheckEmail(w http.ResponseWriter, r *http.Request) {
 	err := u.Templates.CheckEmail.Execute(w, r, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 	}
 }
 
@@ -109,8 +123,8 @@ func (u User) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Current user: %s\n", user.Email)
 	err := u.Templates.Me.Execute(w, r, user.Email)
 	if err != nil {
-		log.Printf("error rendering me: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		log.Printf("error rendering me: %v\n", err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 }
@@ -118,12 +132,10 @@ func (u User) CurrentUser(w http.ResponseWriter, r *http.Request) {
 func (u User) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 
-	log.Printf("forgot password email %v", email)
-
 	reset, err := u.PasswordResetService.Create(email)
 	if err != nil {
-		log.Printf("create password reset token: %v", err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		log.Printf("create password reset token: %v\n", err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 
@@ -135,8 +147,8 @@ func (u User) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 
 	err = u.EmailService.SendResetEmail(email, resetLink)
 	if err != nil {
-		log.Printf("send reset email: %v", err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		log.Printf("send reset email: %v\n", err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 
@@ -151,7 +163,7 @@ func (u User) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 
 	user, err := u.UserService.Authenticate(email, password)
 	if err != nil {
-		log.Printf("error authenticating %v", err)
+		log.Printf("error authenticating %v\n", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -160,8 +172,8 @@ func (u User) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 
 	session, err := u.SessionService.Create(user.ID)
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		log.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 
@@ -199,14 +211,15 @@ func (u User) ProcessSignUp(w http.ResponseWriter, r *http.Request) {
 		}
 		err := u.Templates.SignUp.Execute(w, r, nil, err)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Println(err)
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		}
 		return
 	}
 
 	session, err := u.SessionService.Create(user.ID)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Redirect(w, r, "/signin", http.StatusSeeOther)
 		return
 	}

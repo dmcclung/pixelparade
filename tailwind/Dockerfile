@@ -6,7 +6,8 @@ RUN mkdir /tailwind
 
 WORKDIR /tailwind
 
-RUN npm install -D tailwindcss
-RUN npx tailwindcss init
+RUN npm init -y && \
+    npm install tailwindcss @tailwindcss/forms && \
+    npx tailwindcss init
 
 CMD npx tailwindcss -c /src/tailwind.config.js -i /src/styles.css -o /dst/styles.css --watch --poll

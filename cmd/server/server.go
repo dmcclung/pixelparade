@@ -165,6 +165,7 @@ func run(cfg config) error {
 			ForgotPassword: views.Must(views.Parse("forgot-password.gohtml", "tailwind.gohtml")),
 			CheckEmail:     views.Must(views.Parse("check-email.gohtml", "tailwind.gohtml")),
 			ResetPassword:  views.Must(views.Parse("reset-password.gohtml", "tailwind.gohtml")),
+			Settings:       views.Must(views.Parse("settings.gohtml", "tailwind.gohtml")),
 		},
 		UserService:          &userService,
 		SessionService:       &sessionService,
@@ -181,6 +182,7 @@ func run(cfg config) error {
 	r.Get("/check-email", userController.CheckEmail)
 	r.Get("/reset-password", userController.ResetPassword)
 	r.Post("/reset-password", userController.ProcessResetPassword)
+	r.Get("/settings", userController.Settings)
 
 	r.Route("/users/me", func(r chi.Router) {
 		r.Use(umw.RequireUser)
