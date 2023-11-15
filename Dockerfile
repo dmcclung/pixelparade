@@ -2,7 +2,7 @@ FROM alpine AS tailwind-builder
 RUN apk add --update nodejs npm
 RUN mkdir /tailwind
 WORKDIR /tailwind
-RUN npm install -D tailwindcss
+RUN npm install -D tailwindcss @tailwindcss/forms
 RUN npx tailwindcss init
 
 COPY ./templates /templates
