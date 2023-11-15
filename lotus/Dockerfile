@@ -1,17 +1,18 @@
-FROM alpine
+FROM alpine:3.16.7
 
-RUN apk add --update hwloc
+ARG LOTUS_VERSION=v1.23.3
+ARG FULLNODE_API_INFO=wss://api.chain.love
 
-RUN mkdir /app
+RUN apk add --no-cache hwloc \
+    && wget https://github.com/filecoin-project/lotus/releases/download/${LOTUS_VERSION}/lotus_${LOTUS_VERSION}_linux_amd64.tar.gz -O /tmp/lotus.tar.gz \
+    && tar -xzf /tmp/lotus.tar.gz -C /tmp \
+    && mv /tmp/lotus_${LOTUS_VERSION}_linux_amd64/lotus /usr/local/bin/lotus \
+    && rm -rf /tmp/*
 
-WORKDIR /app
+WORKDIR /usr/local/bin
 
-RUN wget https://github.com/filecoin-project/lotus/releases/download/v1.22.1/lotus_v1.22.1_linux_amd64.tar.gz
+ENV FULLNODE_API_INFO=${FULLNODE_API_INFO}
 
-RUN tar -xvf lotus_1.22.1_linux_amd64.tar.gz
+ENTRYPOINT ["lotus"]
 
-RUN mv lotus_1.22.1_linux_amd64/lotus /usr/local/bin/lotus
-
-ENV FULLNODE_API_INFO=wss://api.chain.love
-
-CMD ["lotus", "daemon", "--lite"]
+CMD ["daemon", "--lite"]
