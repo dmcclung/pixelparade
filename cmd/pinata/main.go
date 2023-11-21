@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/dmcclung/pixelparade/pinata"
@@ -18,36 +16,19 @@ func main() {
 		return
 	}
 
-	jwt := os.Getenv("PINATA_API_KEY")
+	apiKey := os.Getenv("PINATA_API_KEY")
 
-	req, err := http.NewRequest(
-		"GET",
-		"https://api.pinata.cloud/data/testAuthentication",
-		nil,
-	)
+	pinataClient := &pinata.Client{
+		Jwt: apiKey,
+	}	
+
+	testAuthenticationResponse, err := pinataClient.TestAuthentication()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	req.Header.Add("accept", "application/json")
-	req.Header.Add("authorization", fmt.Sprintf("Bearer %s", jwt))
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-	log.Println(string(body))
+	log.Println(testAuthenticationResponse.Message)
 
 	wd, err := os.Getwd()
 	if err != nil {
@@ -60,8 +41,11 @@ func main() {
 
 	filePath := fmt.Sprintf("%s/images/gallery-%s/%s", wd, galleryID, imageID)
 
-	pinataClient := &pinata.Client{
-		Jwt: jwt,
+	pinFileResponse, err := pinataClient.PinFile(filePath)
+	if err != nil {
+		log.Fatal(err)
+		return
 	}
-	pinataClient.PinFile(filePath)
+
+	log.Printf("CID: %s\n", pinFileResponse.IpfsHash)
 }
