@@ -75,12 +75,11 @@ func (c *Client) UnPinFile(cid string) error {
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("read delete response: %w", err)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("delete response: %d %s", resp.StatusCode, resp.Status)
 	}
 
-	log.Println(string(body))
+	log.Printf("delete CID %s: %s\n", cid, resp.Status)
 	return nil
 }
 

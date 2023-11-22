@@ -36,8 +36,8 @@ func main() {
 		return
 	}
 
-	const galleryID = "391e851a-6821-4762-9995-3f3e133d06a8"
-	const imageID = "IMG_7867.jpeg"
+	const galleryID = "f61dc186-c1c1-48b4-b65d-6656101bd04f"
+	const imageID = "4c7cda78-4bb1-44bd-a246-d16c850a886e.jpg"
 
 	filePath := fmt.Sprintf("%s/images/gallery-%s/%s", wd, galleryID, imageID)
 
@@ -48,4 +48,10 @@ func main() {
 	}
 
 	log.Printf("CID: %s\n", pinFileResponse.IpfsHash)
+
+	err = pinataClient.UnPinFile(pinFileResponse.IpfsHash)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 }
