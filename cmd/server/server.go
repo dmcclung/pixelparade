@@ -8,6 +8,7 @@ import (
 	"github.com/dmcclung/pixelparade/controllers"
 	"github.com/dmcclung/pixelparade/jwt"
 	"github.com/dmcclung/pixelparade/models"
+	"github.com/dmcclung/pixelparade/pinata"
 	"github.com/dmcclung/pixelparade/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -28,6 +29,7 @@ type config struct {
 	Server struct {
 		Address string
 	}
+	PinataApiKey string
 	OAuthProviders map[string]*oauth2.Config
 }
 
@@ -60,6 +62,8 @@ func loadEnvConfig() (config, error) {
 	cfg.CSRF.Secure = os.Getenv("CSRF_SECURE") == "true"
 
 	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
+
+	cfg.PinataApiKey = os.Getenv("PINATA_API_KEY")
 
 	providers := make(map[string]*oauth2.Config)
 
@@ -115,6 +119,9 @@ func run(cfg config) error {
 
 	galleryService := models.GalleryService{
 		DB: db,
+		PinataClient: &pinata.Client{
+			Jwt: cfg.PinataApiKey,
+		},
 	}
 
 	emailService, err := models.GetEmailService(cfg.SMTP)
@@ -203,14 +210,15 @@ func run(cfg config) error {
 		r.Group(func(r chi.Router) {
 			r.Use(umw.RequireUser)
 			r.Get("/", galleryController.Index)
-			r.Get("/new", galleryController.New)
 			r.Post("/", galleryController.Create)
-			r.Get("/{id}/edit", galleryController.Edit)
+			r.Get("/new", galleryController.New)
 			r.Post("/{id}", galleryController.Update)
+			r.Get("/{id}/edit", galleryController.Edit)
 			r.Post("/{id}/delete", galleryController.Delete)
-			r.Post("/{id}/{filename}/delete", galleryController.DeleteImage)
 			r.Post("/{id}/images", galleryController.CreateImages)
 			r.Post("/{id}/images/url", galleryController.CreateImagesUrl)
+			r.Post("/{id}/{filename}/pin", galleryController.PinImage)
+			r.Post("/{id}/{filename}/delete", galleryController.DeleteImage)
 		})
 		r.Get("/{id}", galleryController.Show)
 		r.Get("/{id}/{filename}", galleryController.Image)

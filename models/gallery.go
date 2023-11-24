@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -13,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/dmcclung/pixelparade/errors"
+	"github.com/dmcclung/pixelparade/pinata"
 )
 
 type Gallery struct {
@@ -22,8 +24,9 @@ type Gallery struct {
 }
 
 type GalleryService struct {
-	DB        *sql.DB
-	ImagesDir string
+	DB           *sql.DB
+	ImagesDir    string
+	PinataClient *pinata.Client
 }
 
 type Image struct {
@@ -103,6 +106,37 @@ func (gs *GalleryService) DeleteImage(galleryID, filename string) error {
 	if err != nil {
 		return fmt.Errorf("delete image: %w", err)
 	}
+	return nil
+}
+
+func (gs *GalleryService) PinImage(galleryID, filename string) error {
+	// Add the content id hash to the image
+	path, err := gs.ImagePath(galleryID, filename)
+	if err != nil {
+		return fmt.Errorf("pin image: %w", err)
+	}
+
+	// Pin the image via Pinata client
+	resp, err := gs.PinataClient.PinFile(path)
+	if err != nil {
+		return fmt.Errorf("pinata pin: %w", err)
+	}
+
+	log.Printf("Successfully pinned image %s, CID %s", filename, resp.IpfsHash)
+
+	// TODO: Update image in database here
+	metaPath := filepath.Join(gs.galleryDir(galleryID), fmt.Sprintf("%s.txt", filename))
+	file, err := os.Create(metaPath)
+	if err != nil {
+		return fmt.Errorf("open metafile: %w", err)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(resp.IpfsHash)
+	if err != nil {
+		return fmt.Errorf("write cid: %w", err)
+	}
+
 	return nil
 }
 

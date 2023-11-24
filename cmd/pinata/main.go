@@ -20,7 +20,7 @@ func main() {
 
 	pinataClient := &pinata.Client{
 		Jwt: apiKey,
-	}	
+	}
 
 	testAuthenticationResponse, err := pinataClient.TestAuthentication()
 	if err != nil {

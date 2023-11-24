@@ -54,7 +54,7 @@ func (c *Client) TestAuthentication() (*TestAuthenticationResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal test auth: %w", err)
 	}
-	
+
 	return &testAuthenticationResponse, nil
 }
 

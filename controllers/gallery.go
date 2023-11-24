@@ -207,6 +207,29 @@ func (g Gallery) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, redirect, http.StatusSeeOther)
 }
 
+func (g Gallery) PinImage(w http.ResponseWriter, r *http.Request) {
+	filename := g.filename(w, r)
+	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
+	if err != nil {
+		return
+	}
+
+	// call into service and delete the image
+	err = g.GalleryService.PinImage(gallery.ID, filename)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	redirect := fmt.Sprintf("/galleries/%s", gallery.ID)
+	http.Redirect(w, r, redirect, http.StatusSeeOther)
+}
+
+func (g Gallery) UnPinImage(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "Not implemented", http.StatusNotImplemented)
+}
+
 func (g Gallery) Delete(w http.ResponseWriter, r *http.Request) {
 	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
 	if err != nil {
