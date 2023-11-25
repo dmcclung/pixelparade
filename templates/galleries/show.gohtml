@@ -9,6 +9,14 @@
       <a href="/galleries/{{.GalleryID}}/{{.Filename}}">
         <img class="w-full" src="/galleries/{{.GalleryID}}/{{.Filename}}">
       </a>
+      <div class="flex items-center mt-2">
+        <form action="/galleries/{{.GalleryID}}/{{.Filename}}/pin" method="post">
+            <div class="hidden">
+                {{csrfField}}
+            </div>
+            <button type="submit" class="py-1 px-2 mr-2 bg-yellow-100 hover:bg-yellow-200 rounded border border-yellow-600 text-xs text-yellow-600">Pin</button>
+        </form>
+      </div>
     </div>
   {{end}}
 </div>
