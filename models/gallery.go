@@ -120,8 +120,31 @@ func (gs *GalleryService) DeleteImage(galleryID, filename string) error {
 	return nil
 }
 
+func (gs *GalleryService) UnPinImage(galleryID, filename string) error {
+	metaPath, err := gs.MetaPath(galleryID, filename)
+	if err != nil {
+		return fmt.Errorf("metapath: %w", err)
+	}
+
+	cid, err := os.ReadFile(metaPath)
+	if err != nil {
+		return fmt.Errorf("read metafile: %w", err)
+	}
+
+	err = gs.PinataClient.UnPinFile(string(cid))
+	if err != nil {
+		return fmt.Errorf("pinata unpin: %w", err)
+	}
+
+	err = os.Remove(metaPath)
+	if err != nil {
+		log.Fatalf("remove %s: %v", metaPath, err)
+	}
+
+	return nil
+}
+
 func (gs *GalleryService) PinImage(galleryID, filename string) error {
-	// Add the content id hash to the image
 	path, err := gs.ImagePath(galleryID, filename)
 	if err != nil {
 		return fmt.Errorf("pin image: %w", err)
@@ -135,11 +158,10 @@ func (gs *GalleryService) PinImage(galleryID, filename string) error {
 
 	log.Printf("Successfully pinned image %s, CID %s", filename, resp.IpfsHash)
 
-	// TODO: Update image in database here
 	metaPath := filepath.Join(gs.galleryDir(galleryID), fmt.Sprintf("%s.txt", filename))
 	file, err := os.Create(metaPath)
 	if err != nil {
-		return fmt.Errorf("open metafile: %w", err)
+		return fmt.Errorf("create metafile: %w", err)
 	}
 	defer file.Close()
 

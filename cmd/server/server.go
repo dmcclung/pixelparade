@@ -218,6 +218,7 @@ func run(cfg config) error {
 			r.Post("/{id}/images", galleryController.CreateImages)
 			r.Post("/{id}/images/url", galleryController.CreateImagesUrl)
 			r.Post("/{id}/{filename}/pin", galleryController.PinImage)
+			r.Post("/{id}/{filename}/unpin", galleryController.UnPinImage)
 			r.Post("/{id}/{filename}/delete", galleryController.DeleteImage)
 		})
 		r.Get("/{id}", galleryController.Show)
