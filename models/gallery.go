@@ -83,6 +83,17 @@ func (gs *GalleryService) galleryDir(id string) string {
 	return filepath.Join(imagesDir, fmt.Sprintf("gallery-%s", id))
 }
 
+func (gs *GalleryService) MetaPath(galleryID, filename string) (string, error) {
+	path := filepath.Join(gs.galleryDir(galleryID), filename+".txt")
+
+	_, err := os.Stat(path)
+	if err != nil {
+		return "", ErrImageMetaNotFound
+	}
+
+	return path, nil
+}
+
 func (gs *GalleryService) ImagePath(galleryID, filename string) (string, error) {
 	path := filepath.Join(gs.galleryDir(galleryID), filename)
 

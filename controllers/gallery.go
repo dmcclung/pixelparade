@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"path/filepath"
 	"sync"
 
@@ -339,6 +340,7 @@ func (g Gallery) Show(w http.ResponseWriter, r *http.Request) {
 	type Image struct {
 		GalleryID string
 		Filename  string
+		CID       string
 	}
 
 	var data struct {
@@ -355,9 +357,21 @@ func (g Gallery) Show(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, image := range images {
+		metaFile, err := g.GalleryService.MetaPath(gallery.ID, image.Filename)
+		var cid []byte
+		if err != nil {
+			log.Println(err)
+		} else {
+			cid, err = os.ReadFile(metaFile)
+			if err != nil {
+				log.Printf("trying to read %s, %v", metaFile, err)
+			}
+		}
+
 		data.Images = append(data.Images, Image{
 			GalleryID: gallery.ID,
 			Filename:  url.PathEscape(image.Filename),
+			CID:       string(cid),
 		})
 	}
 

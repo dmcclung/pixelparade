@@ -29,7 +29,7 @@ type config struct {
 	Server struct {
 		Address string
 	}
-	PinataApiKey string
+	PinataApiKey   string
 	OAuthProviders map[string]*oauth2.Config
 }
 
