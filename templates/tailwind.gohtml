@@ -69,17 +69,13 @@ function tabComponent() {
       <div class="flex h-16 items-center justify-between">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <h1 class="font-['Sora'] text-2xl text-white" alt="PixelParade">🤳🏼📸 Pixel Parade</h1>
+            <a href="/" class="font-['Sora'] text-2xl text-white">
+              <h1 alt="PixelParade">🤳🏼📸 Pixel Parade</h1>
+            </a>
           </div>
           <div class="hidden md:block">
             <div class="ml-10 flex items-baseline space-x-4">
-              <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-              <a href="/"
-                 :class="{ 'bg-gray-900 text-white': currentTab === 'Dashboard', 'text-gray-300 hover:bg-gray-700 hover:text-white': currentTab !== 'Dashboard'}" 
-                 class="rounded-md px-3 py-2 text-sm font-medium"
-                 x-bind:aria-current="currentTab === 'Dashboard' ? 'page' : null">
-                 Dashboard
-              </a>              
+              <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->                            
               {{if currentUser}}
               <a href="/galleries"
                  :class="{ 'bg-gray-900 text-white': currentTab === 'Gallery', 'text-gray-300 hover:bg-gray-700 hover:text-white': currentTab !== 'Gallery'}" 
@@ -167,13 +163,7 @@ function tabComponent() {
     <!-- Mobile menu, show/hide based on menu state. -->
     <div class="md:hidden" id="mobile-menu" x-show="menuOpen">
       <div class="space-y-1 px-2 pb-3 pt-2 sm:px-3">
-        <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-        <a href="/"
-          :class="{ 'bg-gray-900 text-white': currentTab === 'Dashboard', 'text-gray-300 hover:bg-gray-700 hover:text-white': currentTab !== 'Dashboard'}" 
-          class="block rounded-md px-3 py-2 text-sm font-medium"
-          x-bind:aria-current="currentTab === 'Dashboard' ? 'page' : null">
-          Dashboard
-        </a>        
+        <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->        
         {{if currentUser}}
         <a href="/galleries"
           :class="{ 'bg-gray-900 text-white': currentTab === 'Gallery', 'text-gray-300 hover:bg-gray-700 hover:text-white': currentTab !== 'Gallery'}" 
