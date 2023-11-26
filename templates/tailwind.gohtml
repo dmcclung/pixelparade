@@ -87,13 +87,7 @@ function tabComponent() {
                  x-bind:aria-current="currentTab === 'Gallery' ? 'page' : null">
                  Gallery
               </a>
-              {{end}}
-              <a href="/users/me"
-                 :class="{ 'bg-gray-900 text-white': currentTab === 'Me', 'text-gray-300 hover:bg-gray-700 hover:text-white': currentTab !== 'Me'}" 
-                 class="rounded-md px-3 py-2 text-sm font-medium"
-                 x-bind:aria-current="currentTab === 'Me' ? 'page' : null">
-                 Me
-              </a>
+              {{end}}              
             </div>
           </div>
         </div>
@@ -187,13 +181,7 @@ function tabComponent() {
           x-bind:aria-current="currentTab === 'Gallery' ? 'page' : null">
           Gallery
         </a>
-        {{end}}
-        <a href="/users/me"
-          :class="{ 'bg-gray-900 text-white': currentTab === 'Me', 'text-gray-300 hover:bg-gray-700 hover:text-white': currentTab !== 'Me'}" 
-          class="block rounded-md px-3 py-2 text-sm font-medium"
-          x-bind:aria-current="currentTab === 'Me' ? 'page' : null">
-          Me
-        </a>
+        {{end}}        
       </div>
       <div class="border-t border-gray-700 pb-3 pt-4">
         {{if currentUser}}
@@ -230,7 +218,7 @@ function tabComponent() {
       </div>
     </div>
   </nav>
-    
+
   <main>
     <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
       <!-- Your content -->
