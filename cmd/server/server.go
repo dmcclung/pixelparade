@@ -154,15 +154,7 @@ func run(cfg config) error {
 
 	r.Get("/", controllers.Static(
 		views.Must(views.Parse("home.gohtml", "tailwind.gohtml")),
-	))
-
-	r.Get("/contact", controllers.Static(
-		views.Must(views.Parse("contact.gohtml", "tailwind.gohtml")),
-	))
-
-	r.Get("/faq", controllers.Faq(
-		views.Must(views.Parse("faq.gohtml", "tailwind.gohtml")),
-	))
+	))	
 
 	userController := controllers.User{
 		Templates: controllers.UserTemplates{
