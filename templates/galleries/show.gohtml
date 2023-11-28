@@ -5,28 +5,28 @@
   </h1>
   <div class="columns-4 gap-4 space-y-4">
   {{range .Images}}
-    <div class="h-min w-full">
-      <a href="/galleries/{{.GalleryID}}/{{.Filename}}">
-        <img class="w-full" src="/galleries/{{.GalleryID}}/{{.Filename}}">
-      </a>      
-      <div class="flex items-center mt-2">
-        {{if .CID}}
-          <p><a href="ipfs://{{.CID}}">IPFS</a><p>
+    <div class="group relative h-min w-full">      
+      <div class="opacity-0 group-hover:opacity-100 absolute inset-0 p-2">
+        {{if .CID}}          
           <form action="/galleries/{{.GalleryID}}/{{.Filename}}/unpin" method="post">
             <div class="hidden">
                 {{csrfField}}
             </div>
-            <button type="submit" class="py-1 px-2 mr-2 bg-yellow-100 hover:bg-yellow-200 rounded border border-yellow-600 text-xs text-yellow-600">UnPin</button>
-        </form>
+            <button type="submit" class="py-1 px-2 mr-2 bg-transparent rounded border border-gray-300 text-xs text-white text-opacity-50 hover:text-opacity-100 hover:border-white">UnPin</button>
+            <a class="py-1 px-2 mr-2 bg-transparent rounded border border-gray-300 text-xs text-white text-opacity-50 hover:text-opacity-100 hover:border-white" href="/galleries/{{.GalleryID}}/{{.Filename}}">Direct Link</a>
+            <a class="py-1 px-2 mr-2 bg-transparent rounded border border-gray-300 text-xs text-white text-opacity-50 hover:text-opacity-100 hover:border-white" href="ipfs://{{.CID}}">IPFS</a>
+          </form>
         {{else}}
         <form action="/galleries/{{.GalleryID}}/{{.Filename}}/pin" method="post">
             <div class="hidden">
                 {{csrfField}}
             </div>
-            <button type="submit" class="py-1 px-2 mr-2 bg-yellow-100 hover:bg-yellow-200 rounded border border-yellow-600 text-xs text-yellow-600">Pin</button>
+            <button type="submit" class="py-1 px-2 mr-2 bg-transparent rounded border border-gray-300 text-xs text-white text-opacity-50 hover:text-opacity-100 hover:border-white">Pin</button>
+            <a class="py-1 px-2 mr-2 bg-transparent rounded border border-gray-300 text-xs text-white text-opacity-50 hover:text-opacity-100 hover:border-white" href="/galleries/{{.GalleryID}}/{{.Filename}}">Direct Link</a>
         </form>
         {{end}}
       </div>
+      <img class="w-full" src="/galleries/{{.GalleryID}}/{{.Filename}}">      
     </div>
   {{end}}
   </div>
