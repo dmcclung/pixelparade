@@ -9,21 +9,20 @@
             <div>
                 <label for="title" class="block text-sm font-medium leading-6 text-gray-900">Title</label>
                 <div class="mt-2">
-                    <input type="title" name="title" id="title" class="block w-full rounded-md border-0 py-1.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" value="{{.Title}}" placeholder="Hiking yosemite">
+                    <input type="title" name="title" id="title" class="block w-full rounded-md border-0 py-1.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm sm:leading-6" value="{{.Title}}" placeholder="Hiking yosemite">
                 </div>
             </div>
-
             <!-- Buttons -->
             <div class="flex justify-end mt-4">
                 <button type="button" onclick="location.href='/galleries';" class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 mr-2">Cancel</button>
-                <button type="submit" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Update</button>
+                <button type="submit" class="rounded-md bg-gray-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">Update</button>
             </div>
         </form>
         <form action="/galleries/{{.ID}}/delete" method="post" onsubmit="return confirm('Do you really want to delete this gallery?');">
             <div class="hidden">
                 {{csrfField}}
             </div>
-            <button type="submit" class="rounded-md bg-red-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">Delete</button>
+            <button type="submit" class="rounded-md bg-gray-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">Delete</button>
         </form>
         <div class="py-4">
             {{template "dropbox_image_chooser_form" .}}
@@ -53,17 +52,10 @@
   method="post"
   onsubmit="return confirm('Do you really want to delete this image?');">
   {{csrfField}}
-  <button
-    type="submit"
-    class="
-      p-1
-      text-xs text-red-800
-      bg-red-100
-      border border-red-400
-      rounded
-    "
-  >
-    Delete
+  <button type="submit" class="bg-white flex items-center justify-center rounded border border-gray-400 p-1 text-xs text-gray-800">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+    </svg>
   </button>
 </form>
 {{end}}
@@ -88,7 +80,7 @@
     type="submit"
     class="
       py-2 px-8
-      bg-indigo-600 hover:bg-indigo-700
+      bg-gray-600 hover:bg-gray-700
       text-white text-lg font-bold
       rounded
     ">
