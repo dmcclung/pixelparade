@@ -36,15 +36,22 @@
                 </div>
             {{end}}
             </div>
-        </div>
-        <div class="py-4">
+        </div>        
+    </div>
+</div>
+<div class="overflow-hidden max-w-md mx-auto rounded-lg bg-white shadow mt-8">
+    <div class="px-4 py-5 sm:p-6">
+      <div class="py-4">
           <form action="/galleries/{{.ID}}/delete" method="post" onsubmit="return confirm('Do you really want to delete this gallery?');">
             <div class="hidden">
                 {{csrfField}}
             </div>
-            <button type="submit" class="rounded-md text-sm font-semibold text-red-600 underline hover:text-red-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">
-              Delete Gallery
-            </button>
+            <div class="mb-4">
+              Deleting this gallery will not be recoverable
+            </div>
+            <button type="submit" class="rounded-md bg-red-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">
+              Delete
+            </button>            
           </form>
         </div>
     </div>
