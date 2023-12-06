@@ -182,6 +182,7 @@ func run(cfg config) error {
 	r.Get("/reset-password", userController.ResetPassword)
 	r.Post("/reset-password", userController.ProcessResetPassword)
 	r.Get("/settings", userController.Settings)
+	r.Post("/settings", userController.UpdateSettings)
 
 	r.Route("/users/me", func(r chi.Router) {
 		r.Use(umw.RequireUser)

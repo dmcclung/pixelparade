@@ -53,6 +53,10 @@ func (u User) Settings(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (u User) UpdateSettings(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/settings", http.StatusSeeOther)
+}
+
 func (u User) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Token  string
