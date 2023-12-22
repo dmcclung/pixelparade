@@ -417,3 +417,10 @@ func (g Gallery) Image(w http.ResponseWriter, r *http.Request) {
 	}
 	http.ServeFile(w, r, path)
 }
+
+func (g Gallery) CreateVideo(w http.ResponseWriter, r *http.Request) {
+	// TODO: Start with logging inputs from front end
+	// Call google colab notebook? How can you host the notebook?
+
+	http.Error(w, "Not implemented", http.StatusNotImplemented)
+}
